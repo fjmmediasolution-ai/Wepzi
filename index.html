@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wepzi App</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Firebase SDKs for Real Phone SMS Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-dark: #0b0c16;
+            --box-bg: #151623;
+            --box-border: #222538;
+            --text-main: #ffffff;
+            --text-muted: #8a8d9e;
+            --link-color: #7240f5;
+            --accent-purple: #8636f3;
+            --gradient-text: linear-gradient(90deg, #a855f7, #c084fc);
+            --gradient-btn: linear-gradient(90deg, #6221ea 0%, #d83086 50%, #f46f5a 100%);
+            --gradient-ring: linear-gradient(135deg, #8636f3, #e53995);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #030408;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 410px;
+            height: 100vh;
+            height: 100dvh;
+            background-color: var(--bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 480px) {
+            .app-container {
+                max-height: 820px;
+                border-radius: 36px;
+                border: 1px solid #1a1c2e;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(114, 64, 245, 0.15);
+            }
+        }
+
+        /* 6-Screen Slider */
+        .screens-wrapper {
+            display: flex;
+            width: 600%;
+            height: 100%;
+            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .screen {
+            width: 16.6666%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: clamp(16px, 3.5vh, 35px) 22px clamp(15px, 2.5vh, 25px) 22px;
+        }
+
+        .show-screen-1 { transform: translateX(0%); }
+        .show-screen-2 { transform: translateX(-16.6666%); }
+        .show-screen-3 { transform: translateX(-33.3333%); }
+        .show-screen-4 { transform: translateX(-50%); }
+        .show-screen-5 { transform: translateX(-66.6666%); }
+        .show-screen-6 { transform: translateX(-83.3333%); }
+
+        .top-nav { display: flex; align-items: center; margin-bottom: clamp(6px, 1.5vh, 15px); }
+        .back-btn { color: var(--text-main); font-size: 18px; cursor: pointer; padding: 6px 12px 6px 0; }
+        
+        .btn-gradient {
+            background: var(--gradient-btn);
+            color: var(--text-main);
+            border: none;
+            padding: clamp(14px, 2.2vh, 18px);
+            border-radius: 16px;
+            font-size: clamp(14px, 2vh, 16px);
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(216, 48, 134, 0.35);
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+        .btn-gradient:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-gradient i { position: absolute; right: 20px; font-size: 16px; }
+
+        .heading-group h2 { color: var(--text-main); font-size: clamp(22px, 3.5vh, 28px); font-weight: 700; line-height: 1.25; }
+        .heading-group h2 span.purple-text { color: #a855f7; }
+        .heading-group h2 span.gradient-text { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; }
+        .heading-group p { color: var(--text-muted); font-size: clamp(12px, 1.6vh, 14px); margin-top: 6px; line-height: 1.4; }
+        .security-badge { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 11px; margin-top: 8px; }
+
+        /* Screen 1 */
+        .welcome-top { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; flex: 1; }
+        .logo-container { width: clamp(80px, 13vh, 110px); height: clamp(80px, 13vh, 110px); margin-bottom: clamp(10px, 2vh, 20px); }
+        .logo-container svg { width: 100%; height: 100%; }
+        .app-title { color: var(--text-main); font-size: clamp(24px, 4vh, 32px); font-weight: 700; margin-bottom: 6px; }
+        .app-subtitle { color: var(--text-main); font-size: clamp(14px, 2.2vh, 16px); font-weight: 600; margin-bottom: 4px; }
+        .app-description { color: var(--text-muted); font-size: 13px; }
+        .language-selector { background-color: var(--box-bg); padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 12px; }
+        .lang-left { display: flex; align-items: center; gap: 10px; color: var(--text-main); font-size: 14px; font-weight: 500; }
+        .lang-left i { color: #10b981; font-size: 18px; }
+        .footer-terms { text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 6px; }
+        .footer-terms a { color: var(--link-color); text-decoration: none; }
+
+        /* Screen 2 */
+        .phone-content { flex: 1; display: flex; flex-direction: column; gap: 18px; }
+        .country-box { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .country-left { display: flex; align-items: center; gap: 12px; color: var(--text-main); font-size: 15px; font-weight: 500; }
+        .phone-input-box { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+        .phone-input-box i { color: var(--text-muted); font-size: 16px; }
+        .phone-input-box input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 16px; width: 100%; letter-spacing: 1px; }
+
+        /* Screen 3 */
+        .otp-content { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        .highlight-phone { color: var(--text-main); font-weight: 600; display: block; margin-top: 4px; font-size: 15px; }
+        .otp-boxes-container { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; }
+        .otp-input { width: clamp(40px, 12vw, 48px); height: clamp(48px, 6.5vh, 58px); background-color: var(--box-bg); border: 1.5px solid var(--box-border); border-radius: 14px; color: var(--text-main); font-size: 20px; font-weight: 700; text-align: center; outline: none; }
+        .otp-input:focus { border-color: #a855f7; box-shadow: 0 0 12px rgba(168, 85, 247, 0.35); }
+        .resend-box { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+        .resend-box span.timer { color: #a855f7; font-weight: 600; }
+        .resend-btn-active { color: #ff7f50 !important; font-weight: 600; cursor: pointer; text-decoration: underline; }
+        .expired-error { color: #ef4444; font-size: 12px; text-align: center; margin-top: 4px; display: none; }
+
+        /* Screen 4 */
+        .profile-content { flex: 1; display: flex; flex-direction: column; gap: 14px; }
+        .avatar-wrapper { display: flex; justify-content: center; position: relative; margin: 8px 0; }
+        .avatar-box { position: relative; width: 100px; height: 100px; cursor: pointer; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #202235; }
+        .camera-badge { position: absolute; bottom: 2px; right: 2px; width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; border: 3px solid var(--bg-dark); font-size: 12px; }
+        .profile-inputs { display: flex; flex-direction: column; gap: 12px; }
+        .input-row { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .input-left-label { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 14px; font-weight: 500; }
+        .name-field-input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 15px; font-weight: 600; text-align: right; width: 160px; }
+        .wepzi-id-box { background-color: var(--box-bg); padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .id-details { display: flex; flex-direction: column; gap: 3px; }
+        .id-title-row { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 13px; }
+        .id-generated-val { color: var(--text-main); font-size: 14px; font-weight: 600; padding-left: 24px; }
+        .verified-check { color: #22c55e; font-size: 18px; }
+
+        /* Screen 5 */
+        .permissions-content { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .permissions-list { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
+        .permission-card { background-color: var(--box-bg); padding: 11px 14px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .perm-left { display: flex; align-items: center; gap: 12px; }
+        .perm-icon-box { width: 38px; height: 38px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 16px; }
+        .icon-contacts { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .icon-notif { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .icon-mic { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .icon-camera { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+        .icon-storage { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .perm-info h4 { color: var(--text-main); font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+        .perm-info p { color: var(--text-muted); font-size: 11px; }
+        .perm-check-badge { width: 22px; height: 22px; border-radius: 50%; background: #7c3aed; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 11px; }
+        .perm-check-badge.unchecked { background: transparent; border: 2px solid var(--box-border); color: transparent; }
+
+        /* Screen 6 */
+        .screen-home { padding: 0 !important; display: flex; flex-direction: column; height: 100%; }
+        .home-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px 20px; }
+        .home-header-left { display: flex; align-items: center; gap: 16px; }
+        .home-header-left i { color: var(--text-main); font-size: 18px; cursor: pointer; }
+        .home-logo { background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; font-weight: 700; }
+        .home-header-right { display: flex; align-items: center; gap: 14px; }
+        .home-header-right i { color: var(--text-main); font-size: 18px; cursor: pointer; }
+        .add-chat-btn { background: #8b5cf6; border: none; width: 32px; height: 32px; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 15px; }
+
+        .status-container { display: flex; gap: 16px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
+        .status-container::-webkit-scrollbar { display: none; }
+        .status-card { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .status-avatar-wrapper { position: relative; width: 58px; height: 58px; border-radius: 50%; padding: 2.5px; background: var(--gradient-ring); }
+        .status-avatar-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-dark); }
+        .status-add-icon { position: absolute; bottom: 0; right: 0; background: #8b5cf6; width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid var(--bg-dark); color: white; font-size: 9px; }
+        .status-label { color: var(--text-main); font-size: 11.5px; font-weight: 500; }
+
+        .filter-bar { display: flex; align-items: center; gap: 8px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .chip { background-color: var(--box-bg); color: var(--text-main); border: none; padding: 6px 16px; border-radius: 20px; font-size: 12.5px; cursor: pointer; }
+        .chip.active { background: #8b5cf6; }
+        .filter-icon-btn { color: var(--text-muted); margin-left: auto; font-size: 14px; }
+
+        .chat-body-container { flex: 1; overflow-y: auto; padding: 10px 20px; scrollbar-width: none; }
+        .chat-body-container::-webkit-scrollbar { display: none; }
+        .empty-chat-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-muted); padding: 20px; }
+        .empty-icon-circle { width: 70px; height: 70px; border-radius: 50%; background: #151623; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #8b5cf6; margin-bottom: 15px; border: 1px dashed rgba(139, 92, 246, 0.4); }
+        .empty-chat-state h3 { color: var(--text-main); font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .empty-chat-state p { font-size: 12.5px; line-height: 1.5; max-width: 240px; }
+
+        .chat-row-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .chat-row-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+        .chat-row-details { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+        .chat-row-header { display: flex; justify-content: space-between; align-items: center; }
+        .chat-row-name { color: var(--text-main); font-size: 14.5px; font-weight: 600; }
+        .chat-row-time { color: var(--text-muted); font-size: 11px; }
+        .chat-row-msg { color: var(--text-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+
+        .home-bottom-nav { background-color: var(--bg-dark); display: flex; justify-content: space-between; align-items: center; padding: 8px 24px 18px 24px; border-top: 1px solid #1a1c2e; }
+        .nav-btn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; cursor: pointer; }
+        .nav-btn-item.active { color: #8b5cf6; }
+        .nav-btn-item i { font-size: 18px; }
+        .center-waveform-btn { background: linear-gradient(135deg, #8b5cf6, #6366f1); width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; margin-top: -22px; box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45); }
+
+        .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-overlay.show { display: flex; }
+        .modal-card { background: #151623; border: 1px solid #2a2d40; border-radius: 24px; width: 85%; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+        .modal-card h3 { color: var(--text-main); font-size: 17px; font-weight: 600; }
+        .modal-input { background: #0b0c16; border: 1px solid #2a2d40; padding: 12px 14px; border-radius: 12px; color: white; font-size: 14px; outline: none; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 6px; }
+        .modal-btn-cancel { background: #222538; color: var(--text-muted); border: none; flex: 1; padding: 12px; border-radius: 12px; cursor: pointer; }
+        .modal-btn-add { background: #8b5cf6; color: white; border: none; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Invisible ReCAPTCHA Container required by Firebase -->
+        <div id="recaptcha-container"></div>
+
+        <!-- Add Contact Modal -->
+        <div class="modal-overlay" id="addContactModal">
+            <div class="modal-card">
+                <h3>Add New Contact</h3>
+                <input type="text" id="newContactName" class="modal-input" placeholder="Person's Full Name">
+                <input type="tel" id="newContactPhone" class="modal-input" placeholder="Phone Number (03XX XXXXXXX)">
+                <input type="text" id="newContactMsg" class="modal-input" placeholder="First Message (Optional)">
+                <div class="modal-btns">
+                    <button class="modal-btn-cancel" onclick="closeAddModal()">Cancel</button>
+                    <button class="modal-btn-add" onclick="saveNewContact()">Add Chat</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screens-wrapper show-screen-1" id="screensWrapper">
+            
+            <!-- ================= SCREEN 1: WELCOME ================= -->
+            <div class="screen" id="welcomeScreen">
+                <div class="welcome-top">
+                    <div class="logo-container">
+                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="gradOrange" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9a44" /><stop offset="100%" stop-color="#fc6076" /></linearGradient>
+                                <linearGradient id="gradPink" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fc6076" /><stop offset="100%" stop-color="#a32cf5" /></linearGradient>
+                                <linearGradient id="gradPurple" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a32cf5" /><stop offset="100%" stop-color="#5521ea" /></linearGradient>
+                            </defs>
+                            <path d="M20 25 Q 32 90 45 80" stroke="url(#gradOrange)" stroke-width="15" stroke-linecap="round"/>
+                            <path d="M75 80 Q 80 40 85 30" stroke="url(#gradPurple)" stroke-width="15" stroke-linecap="round"/>
+                            <path d="M45 80 Q 55 20 75 80" stroke="url(#gradPink)" stroke-width="15" stroke-linecap="round"/>
+                            <circle cx="90" cy="18" r="6" fill="#ff7f50" />
+                        </svg>
+                    </div>
+                    <h1 class="app-title">Wepzi</h1>
+                    <p class="app-subtitle">Connect. Secure. Yours.</p>
+                    <p class="app-description">Private. Fast. Feature Rich.</p>
+                </div>
+
+                <div>
+                    <div class="language-selector">
+                        <div class="lang-left"><i class="fa-solid fa-globe"></i><span>English</span></div>
+                        <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 12px;"></i>
+                    </div>
+                    <button class="btn-gradient" onclick="goToScreen(2)">Get Started <i class="fa-solid fa-arrow-right"></i></button>
+                    <p class="footer-terms">By continuing, you agree to our<br><a href="javascript:void(0)">Terms of Service</a> &gt; <a href="javascript:void(0)">Privacy Policy</a></p>
+                </div>
+            </div>
+
+            <!-- ================= SCREEN 2: PHONE NUMBER ================= -->
+            <div class="screen" id="phoneScreen">
+                <div class="top-nav"><div class="back-btn" onclick="goToScreen(1)"><i class="fa-solid fa-arrow-left"></i></div></div>
+                <div class="phone-content">
+                    <div class="heading-group">
+                        <h2>Enter Your <span class="gradient-text">Phone Number</span></h2>
+                        <p>We will send you a 6-digit code to verify your number.</p>
+                    </div>
+                    <div>
+                        <div class="country-box">
+                            <div class="country-left"><span>🇵🇰</span><span>Pakistan (+92)</span></div>
+                            <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 12px;"></i>
+                        </div>
+                        <div class="phone-input-box">
+                            <i class="fa-solid fa-phone"></i>
+                            <input type="tel" id="phoneNumber" placeholder="3XXXXXXXXX" maxlength="11">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn-gradient" id="sendOtpBtn" onclick="handleSendOTP()">Continue <i class="fa-solid fa-arrow-right"></i></button>
+                    <div class="security-badge"><i class="fa-solid fa-lock"></i><span>Your number is secure and<br>will not be shared.</span></div>
+                </div>
+            </div>
+
+            <!-- ================= SCREEN 3: OTP VERIFICATION ================= -->
+            <div class="screen" id="otpScreen">
+                <div class="top-nav"><div class="back-btn" onclick="goToScreen(2)"><i class="fa-solid fa-arrow-left"></i></div></div>
+                <div class="otp-content">
+                    <div class="heading-group">
+                        <h2><span class="purple-text">Verify</span> Your Number</h2>
+                        <p>Enter the 6-digit code we sent via SMS to <span class="highlight-phone" id="displayUserPhone">+92 300 1234567</span></p>
+                    </div>
+                    <div>
+                        <div class="otp-boxes-container">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 0)" onkeydown="handleOtpBackspace(event, 0)">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpBackspace(event, 1)">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpBackspace(event, 2)">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpBackspace(event, 3)">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpBackspace(event, 4)">
+                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpBackspace(event, 5)">
+                        </div>
+                        <div class="resend-box" id="resendBox">Resend code in <span class="timer" id="timerDisplay">00:45</span></div>
+                        <div class="expired-error" id="expiredError">⚠️ Code expired! Click "Resend Code" for new SMS.</div>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn-gradient" id="verifyOtpBtn" onclick="handleVerifyOTP()">Verify</button>
+                    <div class="security-badge"><i class="fa-solid fa-lock"></i><span>Your verification code is<br>valid for a limited time.</span></div>
+                </div>
+            </div>
+
+            <!-- ================= SCREEN 4: PROFILE SETUP ================= -->
+            <div class="screen" id="profileScreen">
+                <div class="top-nav"><div class="back-btn" onclick="goToScreen(3)"><i class="fa-solid fa-arrow-left"></i></div></div>
+                <div class="profile-content">
+                    <div class="heading-group">
+                        <h2><span class="purple-text">Create</span> Your Profile</h2>
+                        <p>Add your details to get started with Wepzi.</p>
+                    </div>
+                    <div class="avatar-wrapper">
+                        <input type="file" id="fileUploadInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <div class="avatar-box" onclick="document.getElementById('fileUploadInput').click()">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img" id="avatarPreview">
+                            <div class="camera-badge"><i class="fa-solid fa-camera"></i></div>
+                        </div>
+                    </div>
+                    <div class="profile-inputs">
+                        <div class="input-row">
+                            <div class="input-left-label"><i class="fa-regular fa-user"></i><span>Full Name</span></div>
+                            <input type="text" class="name-field-input" id="fullNameInput" placeholder="Ali Raza" oninput="autoGenerateWepziId(this.value)">
+                        </div>
+                        <div class="wepzi-id-box">
+                            <div class="id-details">
+                                <div class="id-title-row"><i class="fa-solid fa-fingerprint"></i><span>Wepzi ID (username)</span></div>
+                                <span class="id-generated-val" id="wepziIdDisplay">aliraza_786</span>
+                            </div>
+                            <i class="fa-solid fa-circle-check verified-check"></i>
+                        </div>
+                    </div>
+                </div>
+                <div><button class="btn-gradient" onclick="handleProfileContinue()">Continue</button></div>
+            </div>
+
+            <!-- ================= SCREEN 5: ALLOW PERMISSIONS ================= -->
+            <div class="screen" id="permissionsScreen">
+                <div class="top-nav"><div class="back-btn" onclick="goToScreen(4)"><i class="fa-solid fa-arrow-left"></i></div></div>
+                <div class="permissions-content">
+                    <div class="heading-group">
+                        <h2>Allow Permissions</h2>
+                        <p>To deliver the best experience, we need access to the following.</p>
+                    </div>
+                    <div class="permissions-list">
+                        <div class="permission-card" onclick="togglePermission(this)">
+                            <div class="perm-left"><div class="perm-icon-box icon-contacts"><i class="fa-solid fa-user"></i></div><div class="perm-info"><h4>Contacts</h4><p>To find and connect with your friends.</p></div></div>
+                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                        <div class="permission-card" onclick="togglePermission(this)">
+                            <div class="perm-left"><div class="perm-icon-box icon-notif"><i class="fa-solid fa-bell"></i></div><div class="perm-info"><h4>Notifications</h4><p>To keep you updated with messages and calls.</p></div></div>
+                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                        <div class="permission-card" onclick="togglePermission(this)">
+                            <div class="perm-left"><div class="perm-icon-box icon-mic"><i class="fa-solid fa-microphone"></i></div><div class="perm-info"><h4>Microphone</h4><p>To record and send voice messages.</p></div></div>
+                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                        <div class="permission-card" onclick="togglePermission(this)">
+                            <div class="perm-left"><div class="perm-icon-box icon-camera"><i class="fa-solid fa-camera"></i></div><div class="perm-info"><h4>Camera</h4><p>To take photos and make video calls.</p></div></div>
+                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                        <div class="permission-card" onclick="togglePermission(this)">
+                            <div class="perm-left"><div class="perm-icon-box icon-storage"><i class="fa-solid fa-folder-open"></i></div><div class="perm-info"><h4>Storage</h4><p>To share photos, videos and files.</p></div></div>
+                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div><button class="btn-gradient" onclick="handlePermissionsContinue()">Continue</button></div>
+            </div>
+
+            <!-- ================= SCREEN 6: MAIN CHAT / HOME ================= -->
+            <div class="screen screen-home" id="homeScreen">
+                <div class="home-header">
+                    <div class="home-header-left">
+                        <i class="fa-solid fa-bars"></i>
+                        <span class="home-logo">Wepzi</span>
+                    </div>
+                    <div class="home-header-right">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <button class="add-chat-btn" onclick="openAddModal()" title="Add New Contact"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                </div>
+
+                <div class="status-container">
+                    <div class="status-card">
+                        <div class="status-avatar-wrapper">
+                            <img src="" id="homeMyStatusAvatar" alt="My Status">
+                            <div class="status-add-icon"><i class="fa-solid fa-plus"></i></div>
+                        </div>
+                        <span class="status-label">My Status</span>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <button class="chip active">All</button>
+                    <button class="chip">Unread</button>
+                    <button class="chip">Groups</button>
+                    <button class="chip">Business</button>
+                    <i class="fa-solid fa-arrow-down-wide-short filter-icon-btn"></i>
+                </div>
+
+                <div class="chat-body-container" id="chatListContainer">
+                    <div class="empty-chat-state" id="emptyChatState">
+                        <div class="empty-icon-circle"><i class="fa-regular fa-comment-dots"></i></div>
+                        <h3>No chats yet</h3>
+                        <p>Click the <strong>+</strong> button at the top to add a person's number and start chatting.</p>
+                    </div>
+                </div>
+
+                <div class="home-bottom-nav">
+                    <div class="nav-btn-item active"><i class="fa-solid fa-comment-dots"></i><span>Chats</span></div>
+                    <div class="nav-btn-item"><i class="fa-solid fa-phone"></i><span>Calls</span></div>
+                    <div class="center-waveform-btn"><i class="fa-solid fa-water"></i></div>
+                    <div class="nav-btn-item"><i class="fa-regular fa-circle-check"></i><span>Status</span></div>
+                    <div class="nav-btn-item"><i class="fa-solid fa-gear"></i><span>Settings</span></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Firebase & Application Logic -->
+    <script>
+        // ================= YOUR FIREBASE CONFIG KEYS HERE =================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        if (firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const wrapper = document.getElementById('screensWrapper');
+        const phoneInput = document.getElementById('phoneNumber');
+        const displayUserPhone = document.getElementById('displayUserPhone');
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const resendBox = document.getElementById('resendBox');
+        const expiredError = document.getElementById('expiredError');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const fullNameInput = document.getElementById('fullNameInput');
+        const wepziIdDisplay = document.getElementById('wepziIdDisplay');
+        const homeMyStatusAvatar = document.getElementById('homeMyStatusAvatar');
+        const addContactModal = document.getElementById('addContactModal');
+        const chatListContainer = document.getElementById('chatListContainer');
+        const emptyChatState = document.getElementById('emptyChatState');
+
+        let confirmationResult = null;
+        let recaptchaVerifier = null;
+        let countdownTimer = null;
+        let timeLeft = 45;
+        let isExpired = false;
+
+        function goToScreen(screenNumber) {
+            wrapper.className = `screens-wrapper show-screen-${screenNumber}`;
+            if (screenNumber === 2) setTimeout(() => phoneInput.focus(), 450);
+            if (screenNumber === 4) setTimeout(() => fullNameInput.focus(), 450);
+            if (screenNumber === 6) homeMyStatusAvatar.src = avatarPreview.src;
+        }
+
+        // Setup Invisible Recaptcha for Real SMS
+        function initRecaptcha() {
+            if (!recaptchaVerifier && window.firebase && firebase.apps.length > 0) {
+                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        // reCAPTCHA solved
+                    }
+                });
+            }
+        }
+
+        // Screen 2 -> Send Real SMS OTP via Firebase
+        async function handleSendOTP() {
+            let rawPhone = phoneInput.value.trim();
+            if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1); // remove leading zero
+
+            if (rawPhone.length < 9) {
+                alert("Barah-e-karam sahi phone number enter karein (e.g., 3001234567)");
+                return;
+            }
+
+            const formattedPhoneNumber = "+92" + rawPhone;
+            displayUserPhone.innerText = formattedPhoneNumber;
+
+            const sendBtn = document.getElementById('sendOtpBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = 'Sending SMS... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+            // Check if Firebase is configured
+            if (!window.firebase || firebase.apps.length === 0) {
+                alert("⚠️ Firebase Keys missing hain!\nCode mein line 630 par apni Firebase project keys daalein taake real SMS deliver ho sake.");
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
+                return;
+            }
+
+            try {
+                initRecaptcha();
+                confirmationResult = await firebase.auth().signInWithPhoneNumber(formattedPhoneNumber, recaptchaVerifier);
+                
+                goToScreen(3);
+                startTimer(45);
+                setTimeout(() => {
+                    clearOtpInputs();
+                    otpInputs[0].focus();
+                }, 450);
+
+            } catch (error) {
+                console.error("SMS Error:", error);
+                alert("❌ SMS bhejne mein masla hua:\n" + error.message);
+                if (recaptchaVerifier) recaptchaVerifier.clear();
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
+
+        // Screen 3 -> Verify Real Code
+        async function handleVerifyOTP() {
+            let enteredCode = "";
+            otpInputs.forEach(input => enteredCode += input.value);
+
+            if (enteredCode.length < 6) {
+                alert("Barah-e-karam 6-digit SMS code enter karein.");
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verifyOtpBtn');
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = 'Verifying... <i class="fa-solid fa-spinner fa-spin"></i>';
+
+            try {
+                if (confirmationResult) {
+                    await confirmationResult.confirm(enteredCode);
+                    clearInterval(countdownTimer);
+                    goToScreen(4); // Success -> Profile Screen
+                } else {
+                    alert("Confirmation session expire ho gaya hai. Dobara try karein.");
+                }
+            } catch (error) {
+                alert("❌ Galat verification code ya expire ho chuka hai!");
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = 'Verify';
+            }
+        }
+
+        function startTimer(seconds) {
+            clearInterval(countdownTimer);
+            timeLeft = seconds;
+            updateTimerDisplay();
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    isExpired = true;
+                    resendBox.innerHTML = `Code nahi mila? <span class="resend-btn-active" onclick="handleSendOTP()">Resend SMS</span>`;
+                    expiredError.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let s = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
+            resendBox.innerHTML = `Resend code in <span class="timer">00:${s}</span>`;
+        }
+
+        function clearOtpInputs() {
+            otpInputs.forEach(input => input.value = '');
+        }
+
+        function handleOtpInput(input, index) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            if (input.value && index < otpInputs.length - 1) {
+                otpInputs[index + 1].focus();
+            }
+        }
+
+        function handleOtpBackspace(event, index) {
+            if (event.key === "Backspace" && !event.target.value && index > 0) {
+                otpInputs[index - 1].focus();
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => avatarPreview.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function autoGenerateWepziId(name) {
+            const cleaned = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            wepziIdDisplay.innerText = cleaned ? cleaned + "_786" : "username_786";
+        }
+
+        function handleProfileContinue() {
+            if (!fullNameInput.value.trim()) {
+                alert("Barah-e-karam apna Full Name enter karein!");
+                fullNameInput.focus();
+                return;
+            }
+            goToScreen(5);
+        }
+
+        function togglePermission(cardElement) {
+            cardElement.querySelector('.perm-check-badge').classList.toggle('unchecked');
+        }
+
+        function handlePermissionsContinue() {
+            goToScreen(6);
+        }
+
+        function openAddModal() {
+            addContactModal.classList.add('show');
+            document.getElementById('newContactName').focus();
+        }
+
+        function closeAddModal() {
+            addContactModal.classList.remove('show');
+            document.getElementById('newContactName').value = '';
+            document.getElementById('newContactPhone').value = '';
+            document.getElementById('newContactMsg').value = '';
+        }
+
+        function saveNewContact() {
+            const name = document.getElementById('newContactName').value.trim();
+            const phone = document.getElementById('newContactPhone').value.trim();
+            const msg = document.getElementById('newContactMsg').value.trim() || "Hey there! I am using Wepzi.";
+
+            if (!name || !phone) {
+                alert("Barah-e-karam Name aur Phone number dono enter karein!");
+                return;
+            }
+
+            if (emptyChatState) emptyChatState.style.display = 'none';
+
+            const chatRow = document.createElement('div');
+            chatRow.className = 'chat-row-item';
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+
+            chatRow.innerHTML = `
+                <img src="${avatarUrl}" class="chat-row-avatar" alt="${name}">
+                <div class="chat-row-details">
+                    <div class="chat-row-header">
+                        <span class="chat-row-name">${name}</span>
+                        <span class="chat-row-time">Just now</span>
+                    </div>
+                    <span class="chat-row-msg">${msg}</span>
+                </div>
+            `;
+            chatListContainer.prepend(chatRow);
+            closeAddModal();
+        }
+    </script>
+</body>
+</html>
