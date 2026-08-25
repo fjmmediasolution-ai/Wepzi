@@ -7,7 +7,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Firebase SDKs for Real Phone SMS Authentication & Database -->
+    <!-- Google Firebase SDKs for Phone SMS Authentication & Database -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -265,7 +265,7 @@
         .dropdown-item:hover { background: rgba(255,255,255,0.06); }
         .dropdown-item i { width: 16px; text-align: center; color: var(--accent-purple); }
 
-        /* Dynamic Search Bar */
+        /* Search Bar */
         .search-container { padding: 0 20px; margin-bottom: 8px; display: none; }
         .search-box { background: var(--box-bg); border-radius: 12px; padding: 8px 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--box-border); }
         .search-box i { color: var(--text-muted); font-size: 14px; }
@@ -303,7 +303,7 @@
         .chat-row-msg { color: var(--text-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
         .unread-badge { background: #8b5cf6; color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: auto; }
 
-        /* Complete Chat Window (Right side sliding animation) */
+        /* Chat Window */
         .chat-window {
             position: absolute;
             top: 0;
@@ -324,7 +324,6 @@
         .chat-win-right { display: flex; align-items: center; gap: 18px; color: var(--text-main); }
         .chat-win-right i { cursor: pointer; font-size: 16px; }
 
-        /* Message feed container */
         .chat-win-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; background-image: radial-gradient(rgba(114, 64, 245, 0.05) 1px, transparent 0); background-size: 16px 16px; scrollbar-width: none; }
         .chat-win-messages::-webkit-scrollbar { display: none; }
         .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.45; position: relative; }
@@ -335,7 +334,7 @@
         .msg-bubble:hover .msg-options { display: flex; }
         .msg-options span { cursor: pointer; }
 
-        /* Media Attachments Dropdown Inside Input */
+        /* Attachments Panel */
         .attachments-panel {
             position: absolute;
             bottom: 75px;
@@ -355,7 +354,7 @@
         .attach-btn-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 11px; }
         .attach-icon-circle { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; color: white; }
 
-        /* Chat input field setup */
+        /* Chat Input Field */
         .chat-win-input-area { padding: 12px 16px 20px 16px; background: var(--bg-dark); border-top: 1px solid var(--box-border); display: flex; align-items: center; gap: 10px; position: relative; }
         .chat-input-wrapper { flex: 1; background: var(--box-bg); border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
         .chat-input-wrapper input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 14px; width: 100%; }
@@ -369,11 +368,10 @@
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* Calls and Status list setups */
         .call-log-badge { font-size: 11px; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
         .status-my-box { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-        /* Comprehensive Settings Layout */
+        /* Settings list */
         .settings-list-container { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; }
         .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--box-bg); border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-bottom: 6px; }
         .settings-item:hover { background: rgba(255,255,255,0.03); }
@@ -402,7 +400,7 @@
 
     <div class="app-container">
         
-        <!-- Invisible ReCAPTCHA Container required by Firebase -->
+        <!-- Invisible ReCAPTCHA Container -->
         <div id="recaptcha-container"></div>
 
         <!-- Add Contact Modal -->
@@ -589,6 +587,7 @@
                         <div class="drawer-item" onclick="switchTab('status')"><i class="fa-regular fa-circle-check"></i> Status</div>
                         <div class="drawer-item" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i> Settings</div>
                         <div class="drawer-item" onclick="alert('Feature coming soon')"><i class="fa-solid fa-user-group"></i> New Community</div>
+                        <div class="drawer-item" onclick="logoutUser()" style="color: #ef4444;"><i class="fa-solid fa-right-from-bracket" style="color: #ef4444;"></i> Log Out</div>
                     </div>
                 </div>
 
@@ -611,11 +610,9 @@
                     </div>
 
                     <!-- Conversation Feed -->
-                    <div class="chat-win-messages" id="chatMessagesFeed">
-                        <!-- Custom message bubbles will load dynamically -->
-                    </div>
+                    <div class="chat-win-messages" id="chatMessagesFeed"></div>
 
-                    <!-- Attachment Options Panel inside Chat Window -->
+                    <!-- Attachment Options Panel -->
                     <div class="attachments-panel" id="attachmentsPanel">
                         <div class="attach-btn-item" onclick="alert('Document option selected')">
                             <div class="attach-icon-circle" style="background: #7c3aed;"><i class="fa-solid fa-file"></i></div>
@@ -665,7 +662,6 @@
                         <i class="fa-solid fa-magnifying-glass" onclick="toggleSearchBar()"></i>
                         <button class="add-chat-btn" onclick="togglePlusDropdown()"><i class="fa-solid fa-plus"></i></button>
                         
-                        <!-- Dropdown Options Menu -->
                         <div class="plus-dropdown" id="plusDropdown">
                             <div class="dropdown-item" onclick="openAddModal()"><i class="fa-solid fa-comment-medical"></i> New Chat</div>
                             <div class="dropdown-item" onclick="alert('New Group created')"><i class="fa-solid fa-users"></i> New Group</div>
@@ -684,8 +680,6 @@
                         <input type="text" id="globalSearchInput" placeholder="Search chats, messages or groups..." oninput="handleGlobalSearch(this.value)">
                     </div>
                 </div>
-
-                <!-- ================= CORE BODY PANELS ================= -->
 
                 <!-- 1. CHATS TAB VIEW -->
                 <div id="tabChatsView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
@@ -728,9 +722,7 @@
                         <h3 style="color: white; font-size: 16px;">Recent Logs</h3>
                         <span style="color: #ef4444; font-size: 12px; cursor: pointer;" onclick="clearCallLogs()">Clear Log</span>
                     </div>
-                    <div id="callsListContainer" style="display: flex; flex-direction: column; gap: 4px;">
-                        <!-- Call logs load dynamically -->
-                    </div>
+                    <div id="callsListContainer" style="display: flex; flex-direction: column; gap: 4px;"></div>
                 </div>
 
                 <!-- 3. STATUS TAB VIEW -->
@@ -764,7 +756,7 @@
                 <div id="tabSettingsView" class="chat-body-container" style="display: none;">
                     <div class="settings-list-container">
                         
-                        <!-- Profile Card Item -->
+                        <!-- Profile Card -->
                         <div class="settings-item" onclick="switchTab('profile')">
                             <div class="settings-left">
                                 <img src="" class="chat-row-avatar" id="settingsMyAvatar" alt="Profile">
@@ -776,7 +768,36 @@
                             <i class="fa-solid fa-qrcode" style="color: var(--text-muted); font-size: 18px;"></i>
                         </div>
 
-                        <!-- General Settings Tree -->
+                        <!-- ================= STEP 3: WEBPAY WALLET CARD ================= -->
+                        <div style="background: linear-gradient(135deg, #1e1b4b, #31104b); border: 1px solid #7c3aed; border-radius: 18px; padding: 16px; margin: 10px 0; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
+                                    <span style="color: #ffffff; font-weight: 700; font-size: 15px;">Webpay Account</span>
+                                </div>
+                                <span style="background: #10b981; color: white; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">ACTIVE</span>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                    <span style="color: var(--text-muted);">Registered Number:</span>
+                                    <span style="color: #ffffff; font-weight: 600;" id="webpayLinkedNumber">+92 300 0000000</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                    <span style="color: var(--text-muted);">Webpay ID:</span>
+                                    <span style="color: #c084fc; font-weight: 600;" id="webpayAccountId">WP-3000000000</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                                    <span style="color: var(--text-muted);">Wallet Balance:</span>
+                                    <span style="color: #10b981; font-weight: 700;" id="webpayBalance">Rs. 0.00 PKR</span>
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.15); font-size: 11px; color: #a78bfa; text-align: center;">
+                                <i class="fa-solid fa-circle-check"></i> Is mobile number par Webpay account active hai
+                            </div>
+                        </div>
+                        <!-- ============================================================= -->
+
                         <div class="settings-item" onclick="alert('Opening Account configurations...')">
                             <div class="settings-left">
                                 <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
@@ -843,6 +864,18 @@
                             <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
                         </div>
 
+                        <!-- Logout Item in Settings -->
+                        <div class="settings-item" onclick="logoutUser()" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #ef4444;"><i class="fa-solid fa-right-from-bracket"></i></div>
+                                <div class="settings-info">
+                                    <h4 style="color: #ef4444;">Log Out</h4>
+                                    <p>Sign out from this device</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                        </div>
+
                     </div>
                 </div>
 
@@ -902,7 +935,7 @@
 
     </div>
 
-    <!-- Firebase & Application Logic -->
+    <!-- Application Logic -->
     <script>
         
         const textbeeConfig = {
@@ -923,7 +956,7 @@
         };
 
         // Initialize Firebase
-        if (firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
             firebase.initializeApp(firebaseConfig);
         }
 
@@ -942,7 +975,7 @@
         const chatListContainer = document.getElementById('chatListContainer');
         const emptyChatState = document.getElementById('emptyChatState');
 
-        // Dynamic element hooks
+        // Dynamic hooks
         const sidebarDrawer = document.getElementById('sidebarDrawer');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const plusDropdown = document.getElementById('plusDropdown');
@@ -954,13 +987,10 @@
         const micBtn = document.getElementById('micBtn');
         const micIcon = document.getElementById('micIcon');
 
-        let confirmationResult = null;
-        let recaptchaVerifier = null;
         let countdownTimer = null;
         let timeLeft = 45;
         let isExpired = false;
 
-        // Custom Simulated Data Store
         let currentActiveChatId = null;
         let isRecording = false;
 
@@ -1002,43 +1032,51 @@
             { name: "Wepzi Core Team", type: "outgoing", status: "Voice Call", time: "Yesterday", avatar: "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=150" }
         ];
 
+        // ================= SCREEN TRANSITIONS & WEBPAY DATA INJECTION (STEP 4) =================
         function goToScreen(screenNumber) {
             wrapper.className = `screens-wrapper show-screen-${screenNumber}`;
             if (screenNumber === 2) setTimeout(() => phoneInput.focus(), 450);
             if (screenNumber === 4) setTimeout(() => fullNameInput.focus(), 450);
             if (screenNumber === 6) {
-                // Main setup update values
                 homeMyStatusAvatar.src = avatarPreview.src;
                 document.getElementById('drawerMyAvatar').src = avatarPreview.src;
                 document.getElementById('statusMyAvatar').src = avatarPreview.src;
                 document.getElementById('settingsMyAvatar').src = avatarPreview.src;
                 document.getElementById('profileTabAvatar').src = avatarPreview.src;
                 
-                document.getElementById('drawerMyName').innerText = fullNameInput.value;
-                document.getElementById('settingsMyName').innerText = fullNameInput.value;
-                document.getElementById('profileTabName').innerText = fullNameInput.value;
-                document.getElementById('profileEditName').innerText = fullNameInput.value;
+                const curName = fullNameInput.value || "Ali Raza";
+                document.getElementById('drawerMyName').innerText = curName;
+                document.getElementById('settingsMyName').innerText = curName;
+                document.getElementById('profileTabName').innerText = curName;
+                document.getElementById('profileEditName').innerText = curName;
 
-                document.getElementById('drawerMyId').innerText = "@" + wepziIdDisplay.innerText;
-                document.getElementById('settingsMyId').innerText = "@" + wepziIdDisplay.innerText;
-                document.getElementById('profileTabId').innerText = "@" + wepziIdDisplay.innerText;
+                const curId = wepziIdDisplay.innerText || "aliraza_786";
+                document.getElementById('drawerMyId').innerText = "@" + curId;
+                document.getElementById('settingsMyId').innerText = "@" + curId;
+                document.getElementById('profileTabId').innerText = "@" + curId;
+
+                // Dynamically update Webpay & Registered Phone Card
+                const savedSession = localStorage.getItem('wepzi_user_session');
+                if (savedSession) {
+                    const user = JSON.parse(savedSession);
+                    const userPhone = user.phone || ("+92" + phoneInput.value);
+                    const rawNo = userPhone.replace("+92", "");
+
+                    if (document.getElementById('webpayLinkedNumber')) {
+                        document.getElementById('webpayLinkedNumber').innerText = userPhone;
+                        document.getElementById('webpayAccountId').innerText = (user.webpay && user.webpay.accountId) ? user.webpay.accountId : ("WP-" + rawNo);
+                        
+                        const balanceVal = (user.webpay && user.webpay.balance !== undefined) ? user.webpay.balance : 0;
+                        document.getElementById('webpayBalance').innerText = `Rs. ${balanceVal.toFixed(2)} PKR`;
+                    }
+                }
 
                 renderChatsList();
                 renderCallsList();
             }
         }
 
-        // Setup Invisible Recaptcha for Real SMS
-        function initRecaptcha() {
-            if (!recaptchaVerifier && window.firebase && firebase.apps.length > 0) {
-                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => {}
-                });
-            }
-        }
-
-        // Screen 2 -> Send Custom SMS OTP via Textbee
+        // Screen 2 -> Send SMS OTP via Textbee
         async function handleSendOTP() {
             let rawPhone = phoneInput.value.trim();
             if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1); 
@@ -1054,13 +1092,6 @@
             const sendBtn = document.getElementById('sendOtpBtn');
             sendBtn.disabled = true;
             sendBtn.innerHTML = 'Sending SMS... <i class="fa-solid fa-spinner fa-spin"></i>';
-
-            if (!textbeeConfig.apiKey || textbeeConfig.apiKey === "Aapki_Textbee_API_Key_Yahan_Dalein") {
-                alert("⚠️ Textbee API Key missing hai!");
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
-                return;
-            }
 
             generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
             isExpired = false;
@@ -1099,7 +1130,7 @@
             }
         }
 
-        // Screen 3 -> Verify Custom SMS Code
+        // Screen 3 -> Verify SMS Code & Existing User Check
         async function handleVerifyOTP() {
             let enteredCode = "";
             otpInputs.forEach(input => enteredCode += input.value);
@@ -1115,18 +1146,65 @@
 
             try {
                 if (isExpired) {
-                    alert("❌ Code expired ho gaya hai! 'Resend SMS' par click karke naya code mangwayeinh.");
+                    alert("❌ Code expired ho gaya hai! 'Resend SMS' par click karke naya code mangwayein.");
                     return;
                 }
 
                 if (generatedOTP && enteredCode === generatedOTP) {
                     clearInterval(countdownTimer);
+                    
+                    let rawPhone = phoneInput.value.trim();
+                    if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1);
+                    const formattedPhoneNumber = "+92" + rawPhone;
+
+                    // Check if User is already registered in Firestore
+                    if (window.firebase && firebase.apps.length > 0) {
+                        try {
+                            const db = firebase.firestore();
+                            const userDoc = await db.collection("users").doc(formattedPhoneNumber).get();
+
+                            if (userDoc.exists) {
+                                // === PURANA USER (EXISTING USER) ===
+                                const existingData = userDoc.data();
+                                
+                                const userSession = {
+                                    name: existingData.name,
+                                    wepziId: existingData.wepziId,
+                                    avatar: existingData.avatar,
+                                    phone: existingData.phoneNumber,
+                                    webpay: existingData.webpay || {
+                                        accountId: "WP-" + rawPhone,
+                                        linkedNumber: existingData.phoneNumber,
+                                        status: "Active",
+                                        balance: 0.00
+                                    },
+                                    isLoggedIn: true,
+                                    isNewUser: false
+                                };
+
+                                localStorage.setItem('wepzi_user_session', JSON.stringify(userSession));
+                                localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
+
+                                fullNameInput.value = existingData.name;
+                                wepziIdDisplay.innerText = existingData.wepziId;
+                                avatarPreview.src = existingData.avatar || avatarPreview.src;
+
+                                alert(`Welcome Back, ${existingData.name}!\nAapka Wepzi aur Webpay account load ho chuka hai.`);
+                                goToScreen(6);
+                                return;
+                            }
+                        } catch (err) {
+                            console.warn("Firestore check skipped:", err.message);
+                        }
+                    }
+
+                    // === NAYA USER (FIRST-TIME USER) ===
                     goToScreen(4); 
                 } else {
                     alert("❌ Galat verification code! Dobara sahi code enter karein.");
                 }
             } catch (error) {
-                alert("❌ Verification fail ho gayi.");
+                alert("❌ Verification fail ho gayi: " + error.message);
             } finally {
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = 'Verify';
@@ -1186,7 +1264,7 @@
             wepziIdDisplay.innerText = cleaned ? cleaned + "_786" : "username_786";
         }
 
-        // Profile Continue (Persisted with LocalStorage)
+        // Screen 4 -> Profile Save & Auto-Create Webpay Account
         async function handleProfileContinue() {
             const name = fullNameInput.value.trim();
             if (!name) {
@@ -1201,6 +1279,31 @@
             const wepziId = wepziIdDisplay.innerText;
             const avatarUrl = avatarPreview.src;
 
+            // Auto-generated Webpay Account Object
+            const webpayAccount = {
+                accountId: "WP-" + rawPhone,
+                linkedNumber: formattedPhoneNumber,
+                status: "Active",
+                balance: 0.00,
+                currency: "PKR",
+                createdAt: new Date().toISOString()
+            };
+
+            const userSession = {
+                name: name,
+                wepziId: wepziId,
+                avatar: avatarUrl,
+                phone: formattedPhoneNumber,
+                webpay: webpayAccount,
+                isLoggedIn: true,
+                isNewUser: true
+            };
+
+            // Save in localStorage for persistent session
+            localStorage.setItem('wepzi_user_session', JSON.stringify(userSession));
+            localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
+
+            // Sync with Cloud Firestore
             if (window.firebase && firebase.apps.length > 0) {
                 try {
                     const db = firebase.firestore();
@@ -1209,18 +1312,12 @@
                         wepziId: wepziId,
                         avatar: avatarUrl,
                         phoneNumber: formattedPhoneNumber,
+                        webpay: webpayAccount,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-
-                    // Session save karne ke liye ye line add ki hai
-                    localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
-
                 } catch (error) {
-                    console.error("Firestore error while saving profile:", error);
+                    console.warn("Firestore sync skipped:", error.message);
                 }
-            } else {
-                // Firebase nahi chal raha to local testing ke liye locally save karein
-                localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
             }
 
             goToScreen(5);
@@ -1245,7 +1342,6 @@
             }
         }
 
-        // Plus Dropdown Options Toggle
         function togglePlusDropdown() {
             plusDropdown.classList.toggle('show');
         }
@@ -1259,18 +1355,15 @@
             }
         }
 
-        // Tab Switching controller
         function switchTab(tab) {
             toggleSidebar(false);
             
-            // Toggle panels
             document.getElementById('tabChatsView').style.display = tab === 'chats' ? 'flex' : 'none';
             document.getElementById('tabCallsView').style.display = tab === 'calls' ? 'block' : 'none';
             document.getElementById('tabStatusView').style.display = tab === 'status' ? 'block' : 'none';
             document.getElementById('tabSettingsView').style.display = tab === 'settings' ? 'block' : 'none';
             document.getElementById('tabProfileView').style.display = tab === 'profile' ? 'block' : 'none';
 
-            // Set active navigation style
             const tabsMapping = { chats: 'btnTabChats', calls: 'btnTabCalls', status: 'btnTabStatus', settings: 'btnTabSettings' };
             Object.values(tabsMapping).forEach(id => {
                 const element = document.getElementById(id);
@@ -1282,7 +1375,6 @@
             }
         }
 
-        // Render Local Chats
         function renderChatsList(filteredData = null) {
             const list = filteredData || mockChats;
             chatListContainer.innerHTML = '';
@@ -1317,7 +1409,6 @@
             });
         }
 
-        // Global Search Logic for chats & messages
         function handleGlobalSearch(term) {
             const normalized = term.toLowerCase().trim();
             if (!normalized) {
@@ -1334,9 +1425,7 @@
             renderChatsList(results);
         }
 
-        // Quick Category Filters
         function filterChats(category, element) {
-            // Remove active style from chips
             const chips = document.querySelectorAll('.filter-bar .chip');
             chips.forEach(c => c.classList.remove('active'));
             element.classList.add('active');
@@ -1352,13 +1441,11 @@
             }
         }
 
-        // Chat Viewport logic
         function openChatWindow(chatId, name, avatar) {
             currentActiveChatId = chatId;
             document.getElementById('chatWinName').innerText = name;
             document.getElementById('chatWinAvatar').src = avatar;
             
-            // Mark read
             const chatObj = mockChats.find(c => c.id === chatId);
             if (chatObj) chatObj.unread = 0;
             renderChatsList();
@@ -1397,11 +1484,9 @@
                 chatMessagesFeed.appendChild(bubble);
             });
 
-            // Scroll to end of conversation
             chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
         }
 
-        // Send Text Input Action
         function sendChatMessage() {
             const inputVal = chatMessageInput.value.trim();
             if (!inputVal) return;
@@ -1412,14 +1497,12 @@
                 mockMessages[currentActiveChatId] = [];
             }
 
-            // Append new message
             mockMessages[currentActiveChatId].push({
                 sender: "me",
                 text: inputVal,
                 time: timeNow
             });
 
-            // Update chat row log
             const chatObj = mockChats.find(c => c.id === currentActiveChatId);
             if (chatObj) {
                 chatObj.lastMsg = inputVal;
@@ -1430,7 +1513,6 @@
             renderMessages();
             renderChatsList();
 
-            // Automatic simulated reply
             setTimeout(() => {
                 if (currentActiveChatId) {
                     mockMessages[currentActiveChatId].push({
@@ -1455,7 +1537,6 @@
             }
         }
 
-        // Voice Recording Simulation
         function toggleVoiceMessageSimulation() {
             if (!isRecording) {
                 isRecording = true;
@@ -1491,7 +1572,6 @@
             attachmentsPanel.classList.toggle('show');
         }
 
-        // Close dropdown when clicking elsewhere
         window.addEventListener('click', (e) => {
             if (!e.target.closest('.home-header-right')) {
                 plusDropdown.classList.remove('show');
@@ -1511,7 +1591,6 @@
             renderMessages();
         }
 
-        // Calls Logging UI Controller
         function renderCallsList() {
             const container = document.getElementById('callsListContainer');
             container.innerHTML = '';
@@ -1546,7 +1625,6 @@
             renderCallsList();
         }
 
-        // Profile details editor [5]
         function editProfileValue(field) {
             const newVal = prompt(`Enter your new ${field}:`);
             if (newVal && newVal.trim()) {
@@ -1555,6 +1633,13 @@
                     document.getElementById('settingsMyName').innerText = newVal;
                     document.getElementById('profileTabName').innerText = newVal;
                     document.getElementById('profileEditName').innerText = newVal;
+                    
+                    const savedSession = localStorage.getItem('wepzi_user_session');
+                    if (savedSession) {
+                        const parsed = JSON.parse(savedSession);
+                        parsed.name = newVal;
+                        localStorage.setItem('wepzi_user_session', JSON.stringify(parsed));
+                    }
                 } else if (field === 'About') {
                     document.getElementById('profileEditAbout').innerText = newVal;
                 }
@@ -1602,44 +1687,59 @@
             closeAddModal();
         }
 
-        // Page load hone par check karne ka function
-        window.addEventListener('DOMContentLoaded', async () => {
-            const savedPhone = localStorage.getItem('wepzi_logged_in_phone');
-            
-            if (savedPhone) {
-                if (window.firebase && firebase.apps.length > 0) {
-                    const db = firebase.firestore();
-                    try {
-                        // Firestore se is number ka record fetch karein
-                        const doc = await db.collection("users").doc(savedPhone).get();
-                        
-                        if (doc.exists) {
-                            const userData = doc.data();
-                            
-                            // UI inputs ko update karein taake goToScreen(6) sahi values utha sake
-                            fullNameInput.value = userData.name;
-                            wepziIdDisplay.innerText = userData.wepziId;
-                            avatarPreview.src = userData.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300";
-                            phoneInput.value = userData.phoneNumber.replace("+92", "");
+        // ================= LOGOUT FUNCTION =================
+        function logoutUser() {
+            const confirmLogout = confirm("Kya aap waqai Wepzi se Log out karna chahte hain?");
+            if (confirmLogout) {
+                localStorage.removeItem('wepzi_user_session');
+                localStorage.removeItem('wepzi_logged_in_phone');
+                
+                phoneInput.value = '';
+                fullNameInput.value = '';
+                clearOtpInputs();
 
-                            // Seedha main chat screen par le jayein
-                            goToScreen(6);
-                        } else {
-                            // Agar local storage mein data hai par firestore mein nahi, to screen 1 par bhein
-                            goToScreen(1);
-                        }
-                    } catch (error) {
-                        console.error("Data load karne mein masla:", error);
-                        goToScreen(1);
-                    }
-                } else {
-                    // Mock state ke liye (agar firebase setup nahi hai)
-                    goToScreen(6);
-                }
-            } else {
-                // Agar session nahi hai to Screen 1 par hi rahein
-                goToScreen(1);
+                location.reload();
             }
+        }
+
+        // ================= AUTO-LOGIN ON PAGE REFRESH =================
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedSession = localStorage.getItem('wepzi_user_session');
+            
+            if (savedSession) {
+                try {
+                    const userData = JSON.parse(savedSession);
+                    
+                    fullNameInput.value = userData.name || "Ali Raza";
+                    wepziIdDisplay.innerText = userData.wepziId || "aliraza_786";
+                    avatarPreview.src = userData.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300";
+                    if (userData.phone) {
+                        phoneInput.value = userData.phone.replace("+92", "");
+                    }
+
+                    // Direct Screen 6 par bhein
+                    goToScreen(6);
+
+                    // Background Cloud Sync
+                    if (window.firebase && firebase.apps.length > 0) {
+                        const db = firebase.firestore();
+                        db.collection("users").doc(userData.phone).get().then((doc) => {
+                            if (doc.exists) {
+                                const cloudData = doc.data();
+                                fullNameInput.value = cloudData.name;
+                                wepziIdDisplay.innerText = cloudData.wepziId;
+                                avatarPreview.src = cloudData.avatar;
+                                goToScreen(6);
+                            }
+                        }).catch(err => console.log("Cloud sync skipped:", err.message));
+                    }
+                    return;
+                } catch (e) {
+                    console.error("Session parse error:", e);
+                }
+            }
+
+            goToScreen(1);
         });
 
     </script>
