@@ -863,6 +863,15 @@
                             <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
                         </div>
 
+<!-- Delete Account Permanently Item -->
+                        <div class="settings-item" onclick="deleteAccountPermanently()" style="border: 1px solid rgba(239, 68, 68, 0.4); margin-top: 10px; background: rgba(239, 68, 68, 0.05);">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #b91c1c;"><i class="fa-solid fa-trash-can"></i></div>
+                                <div class="settings-info"><h4 style="color: #ef4444;">Delete My Account</h4><p>Permanently remove account, contacts and chats</p></div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color: #ef4444; font-size: 11px;"></i>
+                        </div>
+
                         <div class="settings-item" onclick="alert('Privacy configurations')">
                             <div class="settings-left">
                                 <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-lock"></i></div>
@@ -1348,53 +1357,61 @@
                 });
         }
 
-        // Open Realtime Chat Room
         function openChatWindow(chatId, name, avatar, partnerPhone) {
-            currentActiveChatId = chatId;
-            currentChatPartnerPhone = partnerPhone;
-            currentChatPartnerName = name;
-            currentChatPartnerAvatar = avatar;
+    currentActiveChatId = chatId;
+    currentChatPartnerPhone = partnerPhone;
+    currentChatPartnerName = name;
+    currentChatPartnerAvatar = avatar;
+    
+    document.getElementById('chatWinName').innerText = name;
+    document.getElementById('chatWinAvatar').src = avatar;
+    chatWindow.classList.add('open');
+
+    const db = firebase.firestore();
+    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+
+    // Chat open hote hi unread messages ko 'read' mark karein
+    markMessagesAsRead(chatId, partnerPhone);
+
+    if (unsubscribeMessages) unsubscribeMessages();
+
+    // Real-time messages listener
+    unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
+        .orderBy("timestamp", "asc")
+        .onSnapshot((snapshot) => {
+            chatMessagesFeed.innerHTML = '';
             
-            document.getElementById('chatWinName').innerText = name;
-            document.getElementById('chatWinAvatar').src = avatar;
-            chatWindow.classList.add('open');
+            if (snapshot.empty) {
+                chatMessagesFeed.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">No messages yet. Say hello!</div>';
+                return;
+            }
 
-            const db = firebase.firestore();
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            snapshot.forEach((doc) => {
+                const msg = doc.data();
+                const isMe = msg.sender === myPhone;
+                const bubble = document.createElement('div');
+                bubble.className = `msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}`;
 
-            if (unsubscribeMessages) unsubscribeMessages();
+                const timeString = msg.timestamp && msg.timestamp.toDate 
+                    ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                    : 'Just now';
 
-            // Real-time messages listener
-            unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
-                .orderBy("timestamp", "asc")
-                .onSnapshot((snapshot) => {
-                    chatMessagesFeed.innerHTML = '';
-                    
-                    if (snapshot.empty) {
-                        chatMessagesFeed.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">No messages yet. Say hello!</div>';
-                        return;
-                    }
+                // Message Text ke saath Tick Icon add kiya gaya hai
+                bubble.innerHTML = `
+                    <span>${msg.text}</span>
+                    <span class="msg-meta">
+                        ${timeString} ${getTickHtml(msg, isMe)}
+                    </span>
+                `;
+                chatMessagesFeed.appendChild(bubble);
+            });
 
-                    snapshot.forEach((doc) => {
-                        const msg = doc.data();
-                        const isMe = msg.sender === myPhone;
-                        const bubble = document.createElement('div');
-                        bubble.className = `msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}`;
-
-                        const timeString = msg.timestamp && msg.timestamp.toDate 
-                            ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                            : 'Just now';
-
-                        bubble.innerHTML = `
-                            <span>${msg.text}</span>
-                            <span class="msg-meta">${timeString}</span>
-                        `;
-                        chatMessagesFeed.appendChild(bubble);
-                    });
-
-                    chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
-                });
-        }
+            chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
+            
+            // Agar chat khuli ho aur samne wale ka naya message aaye to usay foran read mark karein
+            markMessagesAsRead(chatId, partnerPhone);
+        });
+}
 
         function closeChatWindow() {
             chatWindow.classList.remove('open');
@@ -1403,37 +1420,37 @@
             if (unsubscribeMessages) unsubscribeMessages();
         }
 
-        // Send Realtime Message
         async function sendChatMessage() {
-            const inputVal = chatMessageInput.value.trim();
-            if (!inputVal || !currentActiveChatId) return;
+    const inputVal = chatMessageInput.value.trim();
+    if (!inputVal || !currentActiveChatId) return;
 
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-            const db = firebase.firestore();
+    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+    const db = firebase.firestore();
 
-            chatMessageInput.value = '';
+    chatMessageInput.value = '';
 
-            try {
-                // 1. Add message in messages sub-collection
-                await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
-                    sender: myPhone,
-                    receiver: currentChatPartnerPhone,
-                    text: inputVal,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
+    try {
+        // 1. Message mein status: 'sent' add kiya gaya hai (Single Tick)
+        await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
+            sender: myPhone,
+            receiver: currentChatPartnerPhone,
+            text: inputVal,
+            status: 'sent',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-                // 2. Update chat room header
-                await db.collection("chats").doc(currentActiveChatId).update({
-                    lastMsg: inputVal,
-                    lastSender: myPhone,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
+        // 2. Update chat room header
+        await db.collection("chats").doc(currentActiveChatId).update({
+            lastMsg: inputVal,
+            lastSender: myPhone,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-            } catch (error) {
-                console.error("Message send fail:", error);
-                alert("Message deliver nahi ho saka: " + error.message);
-            }
-        }
+    } catch (error) {
+        console.error("Message send fail:", error);
+        alert("Message deliver nahi ho saka: " + error.message);
+    }
+}
 
         function handleInputKeyPress(event) {
             if (event.key === "Enter") {
@@ -1454,81 +1471,90 @@
             document.getElementById('newContactMsg').value = '';
         }
 
-        async function saveNewContact() {
-            const rawPhone = document.getElementById('newContactPhone').value.trim();
-            let contactPhone = rawPhone.startsWith("0") ? rawPhone.substring(1) : rawPhone;
-            if (!contactPhone.startsWith("+92")) contactPhone = "+92" + contactPhone;
+       async function saveNewContact() {
+    const rawPhone = document.getElementById('newContactPhone').value.trim();
+    let contactPhone = rawPhone.startsWith("0") ? rawPhone.substring(1) : rawPhone;
+    if (!contactPhone.startsWith("+92")) contactPhone = "+92" + contactPhone;
 
-            const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+    const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
+    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
 
-            if (!rawPhone) {
-                alert("Barah-e-karam phone number enter karein!");
-                return;
-            }
+    if (!rawPhone) {
+        alert("Barah-e-karam phone number enter karein!");
+        return;
+    }
 
-            if (contactPhone === myPhone) {
-                alert("Aap apne hi number par chat shuru nahi kar sakte!");
-                return;
-            }
+    if (contactPhone === myPhone) {
+        alert("Aap apne hi number par chat shuru nahi kar sakte!");
+        return;
+    }
 
-            const btnSave = document.getElementById('btnSaveNewContact');
-            btnSave.disabled = true;
-            btnSave.innerHTML = 'Checking... <i class="fa-solid fa-spinner fa-spin"></i>';
+    const btnSave = document.getElementById('btnSaveNewContact');
+    btnSave.disabled = true;
+    btnSave.innerHTML = 'Checking... <i class="fa-solid fa-spinner fa-spin"></i>';
 
-            const db = firebase.firestore();
+    const db = firebase.firestore();
 
-            try {
-                // Check if target user exists in Firestore
-                const userDoc = await db.collection("users").doc(contactPhone).get();
+    try {
+        // Check if target user exists in Firestore
+        const userDoc = await db.collection("users").doc(contactPhone).get();
 
-                if (!userDoc.exists) {
-                    alert("❌ Yeh number Wepzi par registered nahi hai!\nSirf active Wepzi users ke sath chat shuru ki ja sakti hai.");
-                    return;
-                }
-
-                const recipientData = userDoc.data();
-                const recipientName = recipientData.name || "User";
-                const recipientAvatar = recipientData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(recipientName)}&background=8b5cf6&color=fff`;
-
-                const myName = fullNameInput.value || "Me";
-                const myAvatar = avatarPreview.src;
-
-                // Shared Unique Chat ID
-                const chatId = [myPhone, contactPhone].sort().join('_');
-
-                // Create / Update Chat Room
-                await db.collection("chats").doc(chatId).set({
-                    chatId: chatId,
-                    participants: [myPhone, contactPhone],
-                    participantDetails: {
-                        [myPhone]: { name: myName, avatar: myAvatar },
-                        [contactPhone]: { name: recipientName, avatar: recipientAvatar }
-                    },
-                    lastMsg: firstMsg,
-                    lastSender: myPhone,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-
-                // Send Initial Message
-                await db.collection("chats").doc(chatId).collection("messages").add({
-                    sender: myPhone,
-                    receiver: contactPhone,
-                    text: firstMsg,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                closeAddModal();
-                openChatWindow(chatId, recipientName, recipientAvatar, contactPhone);
-
-            } catch (error) {
-                console.error("Contact add fail:", error);
-                alert("Masla pesh aya: " + error.message);
-            } finally {
-                btnSave.disabled = false;
-                btnSave.innerHTML = 'Start Chat';
-            }
+        if (!userDoc.exists) {
+            alert("❌ Yeh number Wepzi par registered nahi hai!\nSirf active Wepzi users ke sath chat shuru ki ja sakti hai.");
+            return;
         }
+
+        const recipientData = userDoc.data();
+        const recipientName = recipientData.name || "User";
+        const recipientAvatar = recipientData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(recipientName)}&background=8b5cf6&color=fff`;
+
+        const myName = fullNameInput.value || "Me";
+        const myAvatar = avatarPreview.src;
+
+        // Shared Unique Chat ID
+        const chatId = [myPhone, contactPhone].sort().join('_');
+
+        // 1. Permanent Contact Save (Number database se kabhi nahi hategi)
+        await db.collection("users").doc(myPhone).collection("saved_contacts").doc(contactPhone).set({
+            phone: contactPhone,
+            name: recipientName,
+            avatar: recipientAvatar,
+            savedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        // 2. Chat Room Create / Update
+        await db.collection("chats").doc(chatId).set({
+            chatId: chatId,
+            participants: [myPhone, contactPhone],
+            participantDetails: {
+                [myPhone]: { name: myName, avatar: myAvatar },
+                [contactPhone]: { name: recipientName, avatar: recipientAvatar }
+            },
+            lastMsg: firstMsg,
+            lastSender: myPhone,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        // 3. First Message with 'sent' status
+        await db.collection("chats").doc(chatId).collection("messages").add({
+            sender: myPhone,
+            receiver: contactPhone,
+            text: firstMsg,
+            status: 'sent',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        closeAddModal();
+        openChatWindow(chatId, recipientName, recipientAvatar, contactPhone);
+
+    } catch (error) {
+        console.error("Contact add fail:", error);
+        alert("Masla pesh aya: " + error.message);
+    } finally {
+        btnSave.disabled = false;
+        btnSave.innerHTML = 'Start Chat';
+    }
+}
 
         // ================= WEBPAY ACTIONS & UI SYNC =================
         function syncWebpayUI() {
@@ -1781,6 +1807,30 @@
             }
         }
 
+async function deleteAccountPermanently() {
+            const confirmDelete = confirm("⚠️ KYA AAP WAQAI APNA ACCOUNT DELETE KARNA CHAHTE HAIN?\n\nAapka profile, saved contacts aur tamam chats hamesha ke liye delete ho jayengi.");
+            if (!confirmDelete) return;
+
+            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!myPhone) return;
+
+            const db = firebase.firestore();
+
+            try {
+                // Firestore se user document delete karein
+                await db.collection("users").doc(myPhone).delete();
+
+                // Local storage clear karein
+                localStorage.removeItem('wepzi_user_session');
+                localStorage.removeItem('wepzi_logged_in_phone');
+
+                alert("Aapka Wepzi account kamyabi se delete ho gaya hai.");
+                location.reload();
+            } catch (err) {
+                alert("Account delete karne mein masla pesh aya: " + err.message);
+            }
+        }
+
         // ================= AUTO-LOGIN PERSISTENCE ON REFRESH =================
         window.addEventListener('DOMContentLoaded', async () => {
             const savedSession = localStorage.getItem('wepzi_user_session');
@@ -1804,6 +1854,47 @@
 
             goToScreen(1);
         });
+
+// --- 1. Ticks generate karne ka function ---
+function getTickHtml(msg, isMe) {
+    if (!isMe) return ''; // Jo message humein mila hai, us par tick nahi dikhana
+
+    if (msg.status === 'read') {
+        // Double Blue Tick (Jab receiver ne message parh liya ho)
+        return '<i class="fa-solid fa-check-double" style="color: #38bdf8; font-size: 11px; margin-left: 4px;"></i>';
+    } else if (msg.status === 'delivered') {
+        // Double Grey Tick (Deliver hone par)
+        return '<i class="fa-solid fa-check-double" style="color: rgba(255,255,255,0.6); font-size: 11px; margin-left: 4px;"></i>';
+    } else {
+        // Single Grey Tick (Server par send hone par)
+        return '<i class="fa-solid fa-check" style="color: rgba(255,255,255,0.6); font-size: 11px; margin-left: 4px;"></i>';
+    }
+}
+
+// --- 2. Chat open hone par messages ko 'read' mark karne ka function ---
+function markMessagesAsRead(chatId, partnerPhone) {
+    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+    if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+    
+    const db = firebase.firestore();
+    db.collection("chats").doc(chatId).collection("messages")
+        .where("sender", "==", partnerPhone)
+        .where("receiver", "==", myPhone)
+        .where("status", "!=", "read")
+        .get()
+        .then((snapshot) => {
+            if (snapshot.empty) return;
+            const batch = db.batch();
+            snapshot.forEach((doc) => {
+                batch.update(doc.ref, { 
+                    status: "read", 
+                    seenAt: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+            });
+            batch.commit();
+        })
+        .catch(err => console.error("Error marking messages read:", err));
+}
 
     </script>
 </body>
