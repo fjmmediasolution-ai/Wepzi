@@ -1076,9 +1076,61 @@
         let callSeconds = 0;
         let currentWebpayAction = null;
 
+                // Helper: Number ko har jagah +92 format mein convert karega
+        function normalizePhoneNumber(phone) {
+            if (!phone) return "";
+            let clean = phone.replace(/[^0-9]/g, '');
+            if (clean.startsWith("92")) {
+                return "+" + clean;
+            } else if (clean.startsWith("0")) {
+                return "+92" + clean.substring(1);
+            } else if (clean.length === 10) {
+                return "+92" + clean;
+            }
+            return "+" + clean;
+        }
+
+        // Incoming Call Listener (Doosre Phone Par Ring Bajaega)
+        function listenForIncomingCalls() {
+            let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
+
+            const myPhone = normalizePhoneNumber(rawPhone);
+            const db = firebase.firestore();
+
+            console.log("Listening for calls on:", myPhone);
+
+            db.collection("calls")
+                .where("receiver", "==", myPhone)
+                .where("status", "==", "ringing")
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            incomingCallData = change.doc.data();
+                            incomingCallData.id = change.doc.id;
+                            
+                            document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
+                            document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+                            document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
+                            document.getElementById('incomingCallModal').classList.add('show');
+
+                            if (ringtoneAudio) {
+                                ringtoneAudio.currentTime = 0;
+                                ringtoneAudio.play().catch(e => console.log("Audio autoplay note:", e));
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error("Call listener error:", error);
+                });
+        }
+        
+
         let mockCalls = [
             { name: "Wepzi Support", type: "incoming", status: "Missed Voice Call", time: "10:30 AM", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" }
         ];
+
+        
 
         // Screen Navigator
         function goToScreen(screenNumber) {
@@ -1747,15 +1799,197 @@
         }
 
         // ================= CALLING SIMULATION =================
-        function startCall(type) {
-            const name = currentChatPartnerName || "Contact";
-            const avatar = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+        // ================= LIVE WEBRTC CALLING SYSTEM =================
+        async function startCall(type) {
+            const rawPartner = currentChatPartnerPhone;
+            const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
 
-            document.getElementById('callName').innerText = name;
-            document.getElementById('callAvatar').src = avatar;
-            document.getElementById('callStatusText').innerText = `${type === 'video' ? 'Video' : 'Voice'} Call Connected`;
+            const partnerPhone = normalizePhoneNumber(rawPartner);
+            const myPhone = normalizePhoneNumber(rawMyPhone);
+            const myName = fullNameInput.value || "Me";
+            const myAvatar = avatarPreview.src;
+
+            if (!partnerPhone || !myPhone) {
+                alert("Pehle contact open karein!");
+                return;
+            }
+
+            // Caller UI ko Ringing par set karein
+            document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
+            document.getElementById('callAvatar').src = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+            document.getElementById('callStatusText').innerText = "Ringing...";
+            document.getElementById('callTimer').innerText = "00:00";
             document.getElementById('callModal').classList.add('show');
 
+            if (dialtoneAudio) {
+                dialtoneAudio.currentTime = 0;
+                dialtoneAudio.play().catch(() => {});
+            }
+
+            try {
+                // 1. Microphone access
+                localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+                peerConnection = new RTCPeerConnection(rtcServers);
+
+                localMediaStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localMediaStream);
+                });
+
+                peerConnection.ontrack = (event) => {
+                    if (remoteAudioStream) remoteAudioStream.srcObject = event.streams[0];
+                };
+
+                const db = firebase.firestore();
+                const callDoc = db.collection("calls").doc();
+                currentCallDocId = callDoc.id;
+
+                const offerCandidates = callDoc.collection("offerCandidates");
+                const answerCandidates = callDoc.collection("answerCandidates");
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        offerCandidates.add(event.candidate.toJSON());
+                    }
+                };
+
+                // 2. Offer create karein
+                const offerDescription = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offerDescription);
+
+                await callDoc.set({
+                    caller: myPhone,
+                    callerName: myName,
+                    callerAvatar: myAvatar,
+                    receiver: partnerPhone,
+                    type: type,
+                    status: "ringing",
+                    offer: { sdp: offerDescription.sdp, type: offerDescription.type },
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // 3. Receiver ke pick karne ka intezar
+                unsubscribeCurrentCall = callDoc.onSnapshot(async (snapshot) => {
+                    const data = snapshot.data();
+                    if (!data) return;
+
+                    if (data.status === "connected" && !peerConnection.currentRemoteDescription && data.answer) {
+                        if (dialtoneAudio) dialtoneAudio.pause();
+                        document.getElementById('callStatusText').innerText = `${type === 'video' ? 'Video' : 'Voice'} Call Connected`;
+                        
+                        const answerDescription = new RTCSessionDescription(data.answer);
+                        await peerConnection.setRemoteDescription(answerDescription);
+
+                        startCallDurationTimer();
+                    }
+
+                    if (data.status === "declined" || data.status === "ended") {
+                        endCallUI();
+                    }
+                });
+
+                answerCandidates.onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const candidate = new RTCIceCandidate(change.doc.data());
+                            peerConnection.addIceCandidate(candidate).catch(() => {});
+                        }
+                    });
+                });
+
+            } catch (err) {
+                console.error("Call error:", err);
+                if (dialtoneAudio) dialtoneAudio.pause();
+                alert("Microphone permission zaroori hai: " + err.message);
+                endCall();
+            }
+        }
+
+        async function acceptIncomingCall() {
+            if (!incomingCallData) return;
+
+            if (ringtoneAudio) ringtoneAudio.pause();
+            document.getElementById('incomingCallModal').classList.remove('show');
+
+            document.getElementById('callName').innerText = incomingCallData.callerName;
+            document.getElementById('callAvatar').src = incomingCallData.callerAvatar;
+            document.getElementById('callStatusText').innerText = `${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call Connected`;
+            document.getElementById('callTimer').innerText = "00:00";
+            document.getElementById('callModal').classList.add('show');
+
+            currentCallDocId = incomingCallData.id;
+            const db = firebase.firestore();
+            const callDoc = db.collection("calls").doc(currentCallDocId);
+
+            try {
+                localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.type === 'video' });
+                peerConnection = new RTCPeerConnection(rtcServers);
+
+                localMediaStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localMediaStream);
+                });
+
+                peerConnection.ontrack = (event) => {
+                    if (remoteAudioStream) remoteAudioStream.srcObject = event.streams[0];
+                };
+
+                const offerCandidates = callDoc.collection("offerCandidates");
+                const answerCandidates = callDoc.collection("answerCandidates");
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        answerCandidates.add(event.candidate.toJSON());
+                    }
+                };
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+
+                const answerDescription = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answerDescription);
+
+                await callDoc.update({
+                    answer: { sdp: answerDescription.sdp, type: answerDescription.type },
+                    status: "connected"
+                });
+
+                offerCandidates.onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const candidate = new RTCIceCandidate(change.doc.data());
+                            peerConnection.addIceCandidate(candidate).catch(() => {});
+                        }
+                    });
+                });
+
+                startCallDurationTimer();
+
+                unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
+                    const data = snapshot.data();
+                    if (data && (data.status === "ended" || data.status === "declined")) {
+                        endCallUI();
+                    }
+                });
+
+            } catch (err) {
+                console.error("Accept fail:", err);
+                alert("Call connect nahi ho saki: " + err.message);
+                endCall();
+            }
+        }
+
+        async function declineIncomingCall() {
+            if (ringtoneAudio) ringtoneAudio.pause();
+            document.getElementById('incomingCallModal').classList.remove('show');
+
+            if (incomingCallData && incomingCallData.id) {
+                firebase.firestore().collection("calls").doc(incomingCallData.id).update({
+                    status: "declined"
+                }).catch(() => {});
+            }
+            incomingCallData = null;
+        }
+
+        function startCallDurationTimer() {
+            clearInterval(activeCallTimerInterval);
             callSeconds = 0;
             activeCallTimerInterval = setInterval(() => {
                 callSeconds++;
@@ -1763,22 +1997,46 @@
                 const secs = (callSeconds % 60).toString().padStart(2, '0');
                 document.getElementById('callTimer').innerText = `${mins}:${secs}`;
             }, 1000);
-
-            mockCalls.unshift({
-                name: name,
-                type: "outgoing",
-                status: `${type === 'video' ? 'Video' : 'Voice'} Call`,
-                time: "Just now",
-                avatar: avatar
-            });
-            renderCallsList();
         }
 
-        function endCall() {
+        async function endCall() {
+            if (dialtoneAudio) dialtoneAudio.pause();
+            if (ringtoneAudio) ringtoneAudio.pause();
+
+            if (currentCallDocId) {
+                firebase.firestore().collection("calls").doc(currentCallDocId).update({
+                    status: "ended"
+                }).catch(() => {});
+            }
+
+            endCallUI();
+        }
+
+        function endCallUI() {
+            if (dialtoneAudio) dialtoneAudio.pause();
+            if (ringtoneAudio) ringtoneAudio.pause();
             clearInterval(activeCallTimerInterval);
-            document.getElementById('callModal').classList.remove('show');
-        }
 
+            if (localMediaStream) {
+                localMediaStream.getTracks().forEach(track => track.stop());
+                localMediaStream = null;
+            }
+
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            if (unsubscribeCurrentCall) {
+                unsubscribeCurrentCall();
+                unsubscribeCurrentCall = null;
+            }
+
+            document.getElementById('callModal').classList.remove('show');
+            document.getElementById('incomingCallModal').classList.remove('show');
+            currentCallDocId = null;
+        }
+        
         function renderCallsList() {
             const container = document.getElementById('callsListContainer');
             if (!container) return;
@@ -2126,12 +2384,14 @@ const dialtoneAudio = document.getElementById('dialtoneAudio');
 const remoteAudioStream = document.getElementById('remoteAudioStream');
 
 function listenForIncomingCalls() {
-    let myPhone = localStorage.getItem('wepzi_logged_in_phone');
-    if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+    let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+    if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
 
+    const myPhone = normalizePhoneNumber(rawPhone);
     const db = firebase.firestore();
 
-    // Listen to incoming ringing calls targeted to my number
+    console.log("Listening for calls on:", myPhone);
+
     db.collection("calls")
         .where("receiver", "==", myPhone)
         .where("status", "==", "ringing")
@@ -2140,9 +2400,23 @@ function listenForIncomingCalls() {
                 if (change.type === "added") {
                     incomingCallData = change.doc.data();
                     incomingCallData.id = change.doc.id;
-                    showIncomingCallUI(incomingCallData);
+                    
+                    // UI Show karein
+                    document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
+                    document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+                    document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
+                    document.getElementById('incomingCallModal').classList.add('show');
+
+                    // Ringtone play karein
+                    const ringtone = document.getElementById('ringtoneAudio');
+                    if (ringtone) {
+                        ringtone.currentTime = 0;
+                        ringtone.play().catch(e => console.log("Audio autoplay blocked, user interaction needed:", e));
+                    }
                 }
             });
+        }, (error) => {
+            console.error("Call listener error:", error);
         });
 }
 
@@ -2403,6 +2677,19 @@ function endCallUI() {
     document.getElementById('callModal').classList.remove('show');
     document.getElementById('incomingCallModal').classList.remove('show');
     currentCallDocId = null;
+}
+
+function normalizePhoneNumber(phone) {
+    if (!phone) return "";
+    let clean = phone.replace(/[^0-9]/g, ''); // Tamam extra spaces/signs remove karein
+    if (clean.startsWith("92")) {
+        return "+" + clean;
+    } else if (clean.startsWith("0")) {
+        return "+92" + clean.substring(1);
+    } else if (clean.length === 10) {
+        return "+92" + clean;
+    }
+    return "+" + clean;
 }
 
     </script>
