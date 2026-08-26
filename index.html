@@ -481,7 +481,48 @@
             color: #38bdf8 !important; /* WhatsApp Style Vivid Sky Blue */
         }
 
-        
+        /* Online, Offline & Typing Styles */
+        .status-online-text {
+            color: #10b981 !important;
+            font-weight: 600;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-online-text::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-offline-text {
+            color: var(--text-muted) !important;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .status-typing-text {
+            color: #c084fc !important;
+            font-weight: 700;
+            font-size: 11.5px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Message Ticks */
+        .msg-meta {
+            font-size: 9.5px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .tick-icon { font-size: 11px; line-height: 1; }
+        .tick-sent, .tick-delivered { color: rgba(255, 255, 255, 0.6); }
+        .tick-read { color: #38bdf8 !important; }
     
     </style>
 </head>
@@ -753,7 +794,7 @@
                         <div class="chat-input-wrapper">
                             <i class="fa-regular fa-face-smile" onclick="alert('Emoji panel')"></i>
                             <i class="fa-solid fa-paperclip" onclick="toggleAttachments()"></i>
-                            <input type="text" id="chatMessageInput" placeholder="Type a message..." onkeydown="handleInputKeyPress(event)">
+                            <input type="text" id="chatMessageInput" placeholder="Type a message..." oninput="handleUserTyping()" onkeydown="handleInputKeyPress(event)">
                         </div>
                         <div class="action-btn-circle" onclick="sendChatMessage()">
                             <i class="fa-solid fa-paper-plane" style="font-size: 15px;"></i>
@@ -1050,6 +1091,9 @@
         let currentChatPartnerAvatar = null;
         let unsubscribeChatsList = null;
         let unsubscribeMessages = null;
+        let unsubscribePartnerPresence = null;
+        
+        
 
         let activeCallTimerInterval = null;
         let callSeconds = 0;
@@ -1422,18 +1466,27 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             const db = firebase.firestore();
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
 
-            // 1. Partner ka Real-Time Online / Offline Status & Last Seen Listen Karna
+            let partnerIsOnline = false;
+            let partnerLastSeen = null;
+
+            // 1. Partner ka Real-Time Online / Offline / Last Seen Listener
             if (unsubscribePartnerPresence) unsubscribePartnerPresence();
             unsubscribePartnerPresence = db.collection("users").doc(partnerPhone)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
-                        if (data.isOnline) {
-                            statusEl.innerText = "online";
-                            statusEl.className = "status-online-text";
-                        } else {
-                            statusEl.innerText = formatLastSeen(data.lastSeen);
-                            statusEl.className = "status-offline-text";
+                        partnerIsOnline = data.isOnline === true;
+                        partnerLastSeen = data.lastSeen;
+                        
+                        // Status Update (agar typing na ho rahi ho)
+                        if (!statusEl.classList.contains('status-typing-text')) {
+                            if (partnerIsOnline) {
+                                statusEl.innerText = "online";
+                                statusEl.className = "status-online-text";
+                            } else {
+                                statusEl.innerText = formatLastSeen(partnerLastSeen);
+                                statusEl.className = "status-offline-text";
+                            }
                         }
                     } else {
                         statusEl.innerText = "offline";
@@ -1441,12 +1494,35 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                     }
                 });
 
-            // 2. Chat open hote hi partner ke messages ko 'read' (Blue Tick) mark karna
+            // 2. Real-time "Typing..." Listener from Chat Room
+            if (unsubscribeChatDoc) unsubscribeChatDoc();
+            unsubscribeChatDoc = db.collection("chats").doc(chatId)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        const chatData = doc.data();
+                        const isPartnerTyping = chatData.typing && chatData.typing[partnerPhone] === true;
+
+                        if (isPartnerTyping) {
+                            statusEl.innerText = "typing...";
+                            statusEl.className = "status-typing-text";
+                        } else {
+                            if (partnerIsOnline) {
+                                statusEl.innerText = "online";
+                                statusEl.className = "status-online-text";
+                            } else {
+                                statusEl.innerText = formatLastSeen(partnerLastSeen);
+                                statusEl.className = "status-offline-text";
+                            }
+                        }
+                    }
+                });
+
+            // 3. Mark Partner Messages as Read (Blue Tick)
             markMessagesAsRead(chatId, partnerPhone);
 
             if (unsubscribeMessages) unsubscribeMessages();
 
-            // 3. Real-time Messages Stream
+            // 4. Live Message Feed Listener
             unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
                 .orderBy("timestamp", "asc")
                 .onSnapshot((snapshot) => {
@@ -1467,7 +1543,6 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                             ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                             : 'Just now';
 
-                        // Message Text + Time + Single/Double/Blue Tick Icon
                         bubble.innerHTML = `
                             <span>${msg.text}</span>
                             <span class="msg-meta">
@@ -1480,17 +1555,28 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
 
                     chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
 
-                    // Agar chat khuli ho aur samne wale ka naya message aaye to foran read/seen mark karein
+                    // Jab chat khuli ho aur samne wale ka naya message aaye to foran read karein
                     markMessagesAsRead(chatId, partnerPhone);
                 });
         }
 
         function closeChatWindow() {
+            // Typing reset karein
+            if (currentActiveChatId) {
+                const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+                if (myPhone && window.firebase && firebase.apps.length > 0) {
+                    firebase.firestore().collection("chats").doc(currentActiveChatId).set({
+                        typing: { [myPhone]: false }
+                    }, { merge: true });
+                }
+            }
+
             chatWindow.classList.remove('open');
             currentActiveChatId = null;
             currentChatPartnerPhone = null;
             if (unsubscribeMessages) unsubscribeMessages();
             if (unsubscribePartnerPresence) unsubscribePartnerPresence();
+            if (unsubscribeChatDoc) unsubscribeChatDoc();
         }
 
         function closeChatWindow() {
@@ -1500,7 +1586,7 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             if (unsubscribeMessages) unsubscribeMessages();
         }
 
-       async function sendChatMessage() {
+      async function sendChatMessage() {
             const inputVal = chatMessageInput.value.trim();
             if (!inputVal || !currentActiveChatId) return;
 
@@ -1508,6 +1594,11 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             const db = firebase.firestore();
 
             chatMessageInput.value = '';
+
+            // Typing turant false karein
+            db.collection("chats").doc(currentActiveChatId).set({
+                typing: { [myPhone]: false }
+            }, { merge: true });
 
             try {
                 // 1. Initial State: 'sent' (Single Tick)
@@ -1976,36 +2067,63 @@ function markMessagesAsRead(chatId, partnerPhone) {
         .catch(err => console.error("Error marking messages read:", err));
 }
 
-let unsubscribePartnerPresence = null;
 
-        // --- 1. User Online / Offline Presence Updater ---
+        // ================= PRESENCE & TICK HELPERS =================
+       // ================= PRESENCE, TYPING & TICK LOGIC =================
+        let typingTimeout = null;
+        let unsubscribeChatDoc = null;
+
+        // 1. Continuous Live Presence Updater (Heartbeat)
         function updateUserPresence(isOnline) {
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            let myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+            if (!myPhone.startsWith("+92")) myPhone = "+92" + myPhone.replace(/^0+/, '');
 
             const db = firebase.firestore();
             db.collection("users").doc(myPhone).set({
                 isOnline: isOnline,
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(err => console.log("Presence update err:", err));
+            }, { merge: true }).catch(err => console.log("Presence err:", err));
         }
 
-        // App background / close hone par presence handle karna
-        document.addEventListener('visibilitychange', () => {
+        // Har 25 second baad presence refresh karein taake online status break na ho
+        setInterval(() => {
             if (document.visibilityState === 'visible') {
                 updateUserPresence(true);
-            } else {
-                updateUserPresence(false);
             }
+        }, 25000);
+
+        document.addEventListener('visibilitychange', () => {
+            updateUserPresence(document.visibilityState === 'visible');
         });
 
         window.addEventListener('beforeunload', () => {
             updateUserPresence(false);
         });
 
-        // --- 2. Last Seen Timestamp Formatter ---
+        // 2. Typing Indicator Sender Function
+        function handleUserTyping() {
+            if (!currentActiveChatId) return;
+            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const db = firebase.firestore();
+
+            // Set typing true in chat room
+            db.collection("chats").doc(currentActiveChatId).set({
+                typing: { [myPhone]: true }
+            }, { merge: true });
+
+            // 2 second baad automatically typing band karein
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                db.collection("chats").doc(currentActiveChatId).set({
+                    typing: { [myPhone]: false }
+                }, { merge: true });
+            }, 2000);
+        }
+
+        // 3. Last Seen Formatter
         function formatLastSeen(timestamp) {
-            if (!timestamp) return "Offline";
+            if (!timestamp) return "offline";
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             const now = new Date();
             
@@ -2027,23 +2145,20 @@ let unsubscribePartnerPresence = null;
             return `Last seen ${day}/${month} at ${timeStr}`;
         }
 
-        // --- 3. Message Status Ticks Generator (Single, Double, Double Blue) ---
+        // 4. Tick Generator
         function getTickHtml(msg, isMe) {
-            if (!isMe) return ''; // Jo message humein mila hai, us par sender tick nahi dikhega
+            if (!isMe) return '';
 
             if (msg.status === 'read') {
-                // Double Blue Tick (Seen)
                 return `<span title="Seen" class="tick-icon tick-read"><i class="fa-solid fa-check-double"></i></span>`;
             } else if (msg.status === 'delivered') {
-                // Double Grey Tick (Delivered)
                 return `<span title="Delivered" class="tick-icon tick-delivered"><i class="fa-solid fa-check-double"></i></span>`;
             } else {
-                // Single Grey Tick (Sent)
                 return `<span title="Sent" class="tick-icon tick-sent"><i class="fa-solid fa-check"></i></span>`;
             }
         }
 
-        // --- 4. Unread Messages ko Read / Seen Mark Karna ---
+        // 5. Index-Free Mark As Read (Fixes Blue Ticks not showing)
         function markMessagesAsRead(chatId, partnerPhone) {
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -2051,24 +2166,31 @@ let unsubscribePartnerPresence = null;
             const db = firebase.firestore();
             db.collection("chats").doc(chatId).collection("messages")
                 .where("sender", "==", partnerPhone)
-                .where("receiver", "==", myPhone)
-                .where("status", "!=", "read")
                 .get()
                 .then((snapshot) => {
                     if (snapshot.empty) return;
                     const batch = db.batch();
+                    let updatedCount = 0;
+
                     snapshot.forEach((doc) => {
-                        batch.update(doc.ref, { 
-                            status: "read",
-                            seenAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
+                        const data = doc.data();
+                        if (data.status !== "read") {
+                            batch.update(doc.ref, { 
+                                status: "read",
+                                seenAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            updatedCount++;
+                        }
                     });
-                    return batch.commit();
+
+                    if (updatedCount > 0) {
+                        batch.commit();
+                    }
                 })
-                .catch(err => console.error("Error marking messages read:", err));
+                .catch(err => console.error("Error marking read:", err));
         }
 
-        // --- 5. Receiver ke Online aane par incoming messages ko 'delivered' mark karna ---
+        // 6. Incoming Messages Delivery Sync
         function markIncomingMessagesAsDelivered() {
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -2076,15 +2198,18 @@ let unsubscribePartnerPresence = null;
             const db = firebase.firestore();
             db.collectionGroup("messages")
                 .where("receiver", "==", myPhone)
-                .where("status", "==", "sent")
                 .get()
                 .then((snapshot) => {
                     if (snapshot.empty) return;
                     const batch = db.batch();
+                    let count = 0;
                     snapshot.forEach((doc) => {
-                        batch.update(doc.ref, { status: "delivered" });
+                        if (doc.data().status === "sent") {
+                            batch.update(doc.ref, { status: "delivered" });
+                            count++;
+                        }
                     });
-                    return batch.commit();
+                    if (count > 0) batch.commit();
                 })
                 .catch(err => console.log("Delivered sync note:", err.message));
         }
