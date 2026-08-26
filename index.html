@@ -334,7 +334,7 @@
         .chat-win-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--box-border); background: var(--box-bg); }
         .chat-win-left { display: flex; align-items: center; gap: 12px; }
         .chat-win-info h4 { color: var(--text-main); font-size: 15px; font-weight: 700; }
-        .chat-win-info p { color: #10b981; font-size: 11px; font-weight: 600; }
+        .chat-win-info p { font-size: 11px; font-weight: 600; }
         .chat-win-right { display: flex; align-items: center; gap: 18px; color: var(--text-main); }
         .chat-win-right i { cursor: pointer; font-size: 17px; }
 
@@ -343,7 +343,49 @@
         .msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 18px; font-size: 13.5px; line-height: 1.45; position: relative; word-wrap: break-word; }
         .msg-received { background: var(--box-bg); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.03); }
         .msg-sent { background: var(--gradient-msg-me); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25); }
-        .msg-meta { font-size: 9.5px; color: rgba(255,255,255,0.55); text-align: right; margin-top: 4px; display: block; }
+
+        /* Online, Offline & Typing Styles */
+        .status-online-text {
+            color: #10b981 !important;
+            font-weight: 600;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-online-text::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-offline-text {
+            color: var(--text-muted) !important;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .status-typing-text {
+            color: #c084fc !important;
+            font-weight: 700;
+            font-size: 11.5px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Message Ticks & Meta */
+        .msg-meta {
+            font-size: 9.5px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .tick-icon { font-size: 11px; line-height: 1; }
+        .tick-sent, .tick-delivered { color: rgba(255, 255, 255, 0.6); }
+        .tick-read { color: #38bdf8 !important; }
 
         /* Attachments Panel */
         .attachments-panel {
@@ -435,95 +477,6 @@
         .call-user-avatar { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent-purple); object-fit: cover; }
         .call-controls { display: flex; gap: 20px; align-items: center; }
         .call-btn-round { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; cursor: pointer; }
-    
-    
-    /* Online & Last Seen Status Styles */
-        .status-online-text {
-            color: #10b981 !important;
-            font-weight: 600;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .status-online-text::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-offline-text {
-            color: var(--text-muted) !important;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        /* Message Ticks & Meta */
-        .msg-meta {
-            font-size: 9.5px;
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 4px;
-            margin-top: 4px;
-        }
-        .tick-icon {
-            font-size: 11px;
-            line-height: 1;
-        }
-        .tick-sent, .tick-delivered {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .tick-read {
-            color: #38bdf8 !important; /* WhatsApp Style Vivid Sky Blue */
-        }
-
-        /* Online, Offline & Typing Styles */
-        .status-online-text {
-            color: #10b981 !important;
-            font-weight: 600;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .status-online-text::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-offline-text {
-            color: var(--text-muted) !important;
-            font-size: 11px;
-            font-weight: 500;
-        }
-        .status-typing-text {
-            color: #c084fc !important;
-            font-weight: 700;
-            font-size: 11.5px;
-            letter-spacing: 0.3px;
-        }
-
-        /* Message Ticks */
-        .msg-meta {
-            font-size: 9.5px;
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 4px;
-            margin-top: 4px;
-        }
-        .tick-icon { font-size: 11px; line-height: 1; }
-        .tick-sent, .tick-delivered { color: rgba(255, 255, 255, 0.6); }
-        .tick-read { color: #38bdf8 !important; }
-    
     </style>
 </head>
 <body>
@@ -952,7 +905,7 @@
                             <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
                         </div>
 
-<!-- Delete Account Permanently Item -->
+                        <!-- Delete Account Permanently Item -->
                         <div class="settings-item" onclick="deleteAccountPermanently()" style="border: 1px solid rgba(239, 68, 68, 0.4); margin-top: 10px; background: rgba(239, 68, 68, 0.05);">
                             <div class="settings-left">
                                 <div class="settings-icon-box" style="background: #b91c1c;"><i class="fa-solid fa-trash-can"></i></div>
@@ -1034,7 +987,6 @@
 
     <!-- Complete Application Logic -->
     <script>
-        
         const textbeeConfig = {
             apiKey: "txb_LjrQt9fM8gIfwhw2w0G1C8qLEhSvfgsH",
             deviceId: "6a88d6ce6a4667e3e3385f67"
@@ -1092,8 +1044,8 @@
         let unsubscribeChatsList = null;
         let unsubscribeMessages = null;
         let unsubscribePartnerPresence = null;
-        
-        
+        let unsubscribeChatDoc = null;
+        let typingTimeout = null;
 
         let activeCallTimerInterval = null;
         let callSeconds = 0;
@@ -1109,7 +1061,6 @@
             if (screenNumber === 2) setTimeout(() => phoneInput.focus(), 450);
             if (screenNumber === 4) setTimeout(() => fullNameInput.focus(), 450);
             if (screenNumber === 6) {
-                // User ko Online mark karein aur delivered sync chalayein
                 updateUserPresence(true);
                 markIncomingMessagesAsDelivered();
                 homeMyStatusAvatar.src = avatarPreview.src;
@@ -1129,10 +1080,7 @@
                 document.getElementById('settingsMyId').innerText = "@" + curId;
                 document.getElementById('profileTabId').innerText = "@" + curId;
 
-                // Sync Webpay Dashboard Card
                 syncWebpayUI();
-
-                // Start Live Firestore Realtime Chat Sync
                 listenToMyChats();
                 renderCallsList();
             }
@@ -1184,8 +1132,7 @@
                 }, 450);
 
             } catch (error) {
-                console.warn("SMS Gateway Note (Fallback simulated OTP active for testing):", error.message);
-                // Fallback for test convenience if network / API credits limit reached
+                console.warn("SMS Gateway Note:", error.message);
                 alert(`[Wepzi OTP]: Your verification code is ${generatedOTP}`);
                 goToScreen(3);
                 startTimer(45);
@@ -1199,7 +1146,7 @@
             }
         }
 
-        // ================= SCREEN 3: VERIFY OTP & CHECK DATABASE =================
+        // ================= SCREEN 3: VERIFY OTP =================
         async function handleVerifyOTP() {
             let enteredCode = "";
             otpInputs.forEach(input => enteredCode += input.value);
@@ -1226,14 +1173,12 @@
                     if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1);
                     const formattedPhoneNumber = "+92" + rawPhone;
 
-                    // Query Firestore for existing account
                     if (window.firebase && firebase.apps.length > 0) {
                         try {
                             const db = firebase.firestore();
                             const userDoc = await db.collection("users").doc(formattedPhoneNumber).get();
 
                             if (userDoc.exists) {
-                                // === RETURNING USER DETECTED ===
                                 const existingData = userDoc.data();
                                 
                                 const userSession = {
@@ -1257,7 +1202,7 @@
                                 wepziIdDisplay.innerText = existingData.wepziId;
                                 avatarPreview.src = existingData.avatar || avatarPreview.src;
 
-                                alert(`Welcome Back, ${existingData.name}!\nAapka Wepzi aur Webpay account load ho chuka hai.`);
+                                alert(`Welcome Back, ${existingData.name}!`);
                                 goToScreen(6);
                                 return;
                             }
@@ -1266,7 +1211,6 @@
                         }
                     }
 
-                    // === NEW USER DETECTED ===
                     goToScreen(4); 
                 } else {
                     alert("Galat verification code! Dobara check karein.");
@@ -1332,7 +1276,7 @@
             wepziIdDisplay.innerText = cleaned ? cleaned + "_786" : "username_786";
         }
 
-        // ================= SCREEN 4: PROFILE SAVE & AUTO WEBPAY WALLET =================
+        // ================= SCREEN 4: PROFILE SAVE =================
         async function handleProfileContinue() {
             const name = fullNameInput.value.trim();
             if (!name) {
@@ -1347,7 +1291,6 @@
             const wepziId = wepziIdDisplay.innerText;
             const avatarUrl = avatarPreview.src;
 
-            // Auto-generated Webpay Account Object
             const webpayAccount = {
                 accountId: "WP-" + rawPhone,
                 linkedNumber: formattedPhoneNumber,
@@ -1377,6 +1320,8 @@
                         wepziId: wepziId,
                         avatar: avatarUrl,
                         phoneNumber: formattedPhoneNumber,
+                        isOnline: true,
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
                         webpay: webpayAccount,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
@@ -1396,7 +1341,7 @@
             goToScreen(6);
         }
 
-        // ================= SCREEN 6: REAL-TIME FIRESTORE 1-ON-1 CHATS =================
+        // ================= SCREEN 6: REAL-TIME CHATS =================
         function listenToMyChats() {
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -1452,7 +1397,7 @@
                 });
         }
 
-function openChatWindow(chatId, name, avatar, partnerPhone) {
+        function openChatWindow(chatId, name, avatar, partnerPhone) {
             currentActiveChatId = chatId;
             currentChatPartnerPhone = partnerPhone;
             currentChatPartnerName = name;
@@ -1478,7 +1423,6 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                         partnerIsOnline = data.isOnline === true;
                         partnerLastSeen = data.lastSeen;
                         
-                        // Status Update (agar typing na ho rahi ho)
                         if (!statusEl.classList.contains('status-typing-text')) {
                             if (partnerIsOnline) {
                                 statusEl.innerText = "online";
@@ -1494,7 +1438,7 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                     }
                 });
 
-            // 2. Real-time "Typing..." Listener from Chat Room
+            // 2. Real-time "Typing..." Listener
             if (unsubscribeChatDoc) unsubscribeChatDoc();
             unsubscribeChatDoc = db.collection("chats").doc(chatId)
                 .onSnapshot((doc) => {
@@ -1517,12 +1461,12 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                     }
                 });
 
-            // 3. Mark Partner Messages as Read (Blue Tick)
+            // 3. Mark Messages as Read (Blue Tick)
             markMessagesAsRead(chatId, partnerPhone);
 
             if (unsubscribeMessages) unsubscribeMessages();
 
-            // 4. Live Message Feed Listener
+            // 4. Messages Stream
             unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
                 .orderBy("timestamp", "asc")
                 .onSnapshot((snapshot) => {
@@ -1554,20 +1498,17 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                     });
 
                     chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
-
-                    // Jab chat khuli ho aur samne wale ka naya message aaye to foran read karein
                     markMessagesAsRead(chatId, partnerPhone);
                 });
         }
 
         function closeChatWindow() {
-            // Typing reset karein
             if (currentActiveChatId) {
                 const myPhone = localStorage.getItem('wepzi_logged_in_phone');
                 if (myPhone && window.firebase && firebase.apps.length > 0) {
                     firebase.firestore().collection("chats").doc(currentActiveChatId).set({
                         typing: { [myPhone]: false }
-                    }, { merge: true });
+                    }, { merge: true }).catch(() => {});
                 }
             }
 
@@ -1579,14 +1520,7 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             if (unsubscribeChatDoc) unsubscribeChatDoc();
         }
 
-        function closeChatWindow() {
-            chatWindow.classList.remove('open');
-            currentActiveChatId = null;
-            currentChatPartnerPhone = null;
-            if (unsubscribeMessages) unsubscribeMessages();
-        }
-
-      async function sendChatMessage() {
+        async function sendChatMessage() {
             const inputVal = chatMessageInput.value.trim();
             if (!inputVal || !currentActiveChatId) return;
 
@@ -1595,13 +1529,12 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
 
             chatMessageInput.value = '';
 
-            // Typing turant false karein
+            // Reset typing
             db.collection("chats").doc(currentActiveChatId).set({
                 typing: { [myPhone]: false }
             }, { merge: true });
 
             try {
-                // 1. Initial State: 'sent' (Single Tick)
                 await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
                     sender: myPhone,
                     receiver: currentChatPartnerPhone,
@@ -1610,7 +1543,6 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 2. Chat Header Update
                 await db.collection("chats").doc(currentActiveChatId).update({
                     lastMsg: inputVal,
                     lastSender: myPhone,
@@ -1629,7 +1561,7 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             }
         }
 
-        // ================= CONTACT LOOKUP & ADD MODAL =================
+        // ================= CONTACT LOOKUP =================
         function openAddModal() {
             plusDropdown.classList.remove('show');
             addContactModal.classList.add('show');
@@ -1642,92 +1574,87 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             document.getElementById('newContactMsg').value = '';
         }
 
-       async function saveNewContact() {
-    const rawPhone = document.getElementById('newContactPhone').value.trim();
-    let contactPhone = rawPhone.startsWith("0") ? rawPhone.substring(1) : rawPhone;
-    if (!contactPhone.startsWith("+92")) contactPhone = "+92" + contactPhone;
+        async function saveNewContact() {
+            const rawPhone = document.getElementById('newContactPhone').value.trim();
+            let contactPhone = rawPhone.startsWith("0") ? rawPhone.substring(1) : rawPhone;
+            if (!contactPhone.startsWith("+92")) contactPhone = "+92" + contactPhone;
 
-    const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
-    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
+            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
 
-    if (!rawPhone) {
-        alert("Barah-e-karam phone number enter karein!");
-        return;
-    }
+            if (!rawPhone) {
+                alert("Barah-e-karam phone number enter karein!");
+                return;
+            }
 
-    if (contactPhone === myPhone) {
-        alert("Aap apne hi number par chat shuru nahi kar sakte!");
-        return;
-    }
+            if (contactPhone === myPhone) {
+                alert("Aap apne hi number par chat shuru nahi kar sakte!");
+                return;
+            }
 
-    const btnSave = document.getElementById('btnSaveNewContact');
-    btnSave.disabled = true;
-    btnSave.innerHTML = 'Checking... <i class="fa-solid fa-spinner fa-spin"></i>';
+            const btnSave = document.getElementById('btnSaveNewContact');
+            btnSave.disabled = true;
+            btnSave.innerHTML = 'Checking... <i class="fa-solid fa-spinner fa-spin"></i>';
 
-    const db = firebase.firestore();
+            const db = firebase.firestore();
 
-    try {
-        // Check if target user exists in Firestore
-        const userDoc = await db.collection("users").doc(contactPhone).get();
+            try {
+                const userDoc = await db.collection("users").doc(contactPhone).get();
 
-        if (!userDoc.exists) {
-            alert("❌ Yeh number Wepzi par registered nahi hai!\nSirf active Wepzi users ke sath chat shuru ki ja sakti hai.");
-            return;
+                if (!userDoc.exists) {
+                    alert("❌ Yeh number Wepzi par registered nahi hai!\nSirf active Wepzi users ke sath chat shuru ki ja sakti hai.");
+                    return;
+                }
+
+                const recipientData = userDoc.data();
+                const recipientName = recipientData.name || "User";
+                const recipientAvatar = recipientData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(recipientName)}&background=8b5cf6&color=fff`;
+
+                const myName = fullNameInput.value || "Me";
+                const myAvatar = avatarPreview.src;
+
+                const chatId = [myPhone, contactPhone].sort().join('_');
+
+                await db.collection("users").doc(myPhone).collection("saved_contacts").doc(contactPhone).set({
+                    phone: contactPhone,
+                    name: recipientName,
+                    avatar: recipientAvatar,
+                    savedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                await db.collection("chats").doc(chatId).set({
+                    chatId: chatId,
+                    participants: [myPhone, contactPhone],
+                    participantDetails: {
+                        [myPhone]: { name: myName, avatar: myAvatar },
+                        [contactPhone]: { name: recipientName, avatar: recipientAvatar }
+                    },
+                    lastMsg: firstMsg,
+                    lastSender: myPhone,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                await db.collection("chats").doc(chatId).collection("messages").add({
+                    sender: myPhone,
+                    receiver: contactPhone,
+                    text: firstMsg,
+                    status: 'sent',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeAddModal();
+                openChatWindow(chatId, recipientName, recipientAvatar, contactPhone);
+
+            } catch (error) {
+                console.error("Contact add fail:", error);
+                alert("Masla pesh aya: " + error.message);
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = 'Start Chat';
+            }
         }
 
-        const recipientData = userDoc.data();
-        const recipientName = recipientData.name || "User";
-        const recipientAvatar = recipientData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(recipientName)}&background=8b5cf6&color=fff`;
-
-        const myName = fullNameInput.value || "Me";
-        const myAvatar = avatarPreview.src;
-
-        // Shared Unique Chat ID
-        const chatId = [myPhone, contactPhone].sort().join('_');
-
-        // 1. Permanent Contact Save (Number database se kabhi nahi hategi)
-        await db.collection("users").doc(myPhone).collection("saved_contacts").doc(contactPhone).set({
-            phone: contactPhone,
-            name: recipientName,
-            avatar: recipientAvatar,
-            savedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        // 2. Chat Room Create / Update
-        await db.collection("chats").doc(chatId).set({
-            chatId: chatId,
-            participants: [myPhone, contactPhone],
-            participantDetails: {
-                [myPhone]: { name: myName, avatar: myAvatar },
-                [contactPhone]: { name: recipientName, avatar: recipientAvatar }
-            },
-            lastMsg: firstMsg,
-            lastSender: myPhone,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-
-        // 3. First Message with 'sent' status
-        await db.collection("chats").doc(chatId).collection("messages").add({
-            sender: myPhone,
-            receiver: contactPhone,
-            text: firstMsg,
-            status: 'sent',
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        closeAddModal();
-        openChatWindow(chatId, recipientName, recipientAvatar, contactPhone);
-
-    } catch (error) {
-        console.error("Contact add fail:", error);
-        alert("Masla pesh aya: " + error.message);
-    } finally {
-        btnSave.disabled = false;
-        btnSave.innerHTML = 'Start Chat';
-    }
-}
-
-        // ================= WEBPAY ACTIONS & UI SYNC =================
+        // ================= WEBPAY ACTIONS =================
         function syncWebpayUI() {
             const savedSession = localStorage.getItem('wepzi_user_session');
             if (savedSession) {
@@ -1785,7 +1712,6 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                 localStorage.setItem('wepzi_user_session', JSON.stringify(user));
                 syncWebpayUI();
 
-                // Firestore sync
                 if (window.firebase && firebase.apps.length > 0) {
                     const db = firebase.firestore();
                     db.collection("users").doc(user.phone).update({ webpay: user.webpay }).catch(err => console.log(err));
@@ -1813,7 +1739,6 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
                 document.getElementById('callTimer').innerText = `${mins}:${secs}`;
             }, 1000);
 
-            // Add to calls list
             mockCalls.unshift({
                 name: name,
                 type: "outgoing",
@@ -1860,7 +1785,7 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
             renderCallsList();
         }
 
-        // ================= QR CODE & PROFILE MODAL =================
+        // ================= QR CODE =================
         function openQrModal() {
             document.getElementById('qrModalName').innerText = fullNameInput.value || "Ali Raza";
             document.getElementById('qrModalId').innerText = "@" + (wepziIdDisplay.innerText || "aliraza_786");
@@ -1972,13 +1897,14 @@ function openChatWindow(chatId, name, avatar, partnerPhone) {
         function logoutUser() {
             const confirmLogout = confirm("Kya aap waqai Wepzi se Log out karna chahte hain?");
             if (confirmLogout) {
+                updateUserPresence(false);
                 localStorage.removeItem('wepzi_user_session');
                 localStorage.removeItem('wepzi_logged_in_phone');
                 location.reload();
             }
         }
 
-async function deleteAccountPermanently() {
+        async function deleteAccountPermanently() {
             const confirmDelete = confirm("⚠️ KYA AAP WAQAI APNA ACCOUNT DELETE KARNA CHAHTE HAIN?\n\nAapka profile, saved contacts aur tamam chats hamesha ke liye delete ho jayengi.");
             if (!confirmDelete) return;
 
@@ -1988,13 +1914,9 @@ async function deleteAccountPermanently() {
             const db = firebase.firestore();
 
             try {
-                // Firestore se user document delete karein
                 await db.collection("users").doc(myPhone).delete();
-
-                // Local storage clear karein
                 localStorage.removeItem('wepzi_user_session');
                 localStorage.removeItem('wepzi_logged_in_phone');
-
                 alert("Aapka Wepzi account kamyabi se delete ho gaya hai.");
                 location.reload();
             } catch (err) {
@@ -2002,7 +1924,7 @@ async function deleteAccountPermanently() {
             }
         }
 
-        // ================= AUTO-LOGIN PERSISTENCE ON REFRESH =================
+        // ================= AUTO-LOGIN PERSISTENCE =================
         window.addEventListener('DOMContentLoaded', async () => {
             const savedSession = localStorage.getItem('wepzi_user_session');
             
@@ -2026,54 +1948,7 @@ async function deleteAccountPermanently() {
             goToScreen(1);
         });
 
-// --- 1. Ticks generate karne ka function ---
-function getTickHtml(msg, isMe) {
-    if (!isMe) return ''; // Jo message humein mila hai, us par tick nahi dikhana
-
-    if (msg.status === 'read') {
-        // Double Blue Tick (Jab receiver ne message parh liya ho)
-        return '<i class="fa-solid fa-check-double" style="color: #38bdf8; font-size: 11px; margin-left: 4px;"></i>';
-    } else if (msg.status === 'delivered') {
-        // Double Grey Tick (Deliver hone par)
-        return '<i class="fa-solid fa-check-double" style="color: rgba(255,255,255,0.6); font-size: 11px; margin-left: 4px;"></i>';
-    } else {
-        // Single Grey Tick (Server par send hone par)
-        return '<i class="fa-solid fa-check" style="color: rgba(255,255,255,0.6); font-size: 11px; margin-left: 4px;"></i>';
-    }
-}
-
-// --- 2. Chat open hone par messages ko 'read' mark karne ka function ---
-function markMessagesAsRead(chatId, partnerPhone) {
-    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-    if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
-    
-    const db = firebase.firestore();
-    db.collection("chats").doc(chatId).collection("messages")
-        .where("sender", "==", partnerPhone)
-        .where("receiver", "==", myPhone)
-        .where("status", "!=", "read")
-        .get()
-        .then((snapshot) => {
-            if (snapshot.empty) return;
-            const batch = db.batch();
-            snapshot.forEach((doc) => {
-                batch.update(doc.ref, { 
-                    status: "read", 
-                    seenAt: firebase.firestore.FieldValue.serverTimestamp() 
-                });
-            });
-            batch.commit();
-        })
-        .catch(err => console.error("Error marking messages read:", err));
-}
-
-
-        // ================= PRESENCE & TICK HELPERS =================
-       // ================= PRESENCE, TYPING & TICK LOGIC =================
-        let typingTimeout = null;
-        let unsubscribeChatDoc = null;
-
-        // 1. Continuous Live Presence Updater (Heartbeat)
+        // ================= PRESENCE, TYPING & TICK LOGIC =================
         function updateUserPresence(isOnline) {
             let myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -2086,7 +1961,7 @@ function markMessagesAsRead(chatId, partnerPhone) {
             }, { merge: true }).catch(err => console.log("Presence err:", err));
         }
 
-        // Har 25 second baad presence refresh karein taake online status break na ho
+        // Heartbeat timer for live online presence
         setInterval(() => {
             if (document.visibilityState === 'visible') {
                 updateUserPresence(true);
@@ -2101,18 +1976,15 @@ function markMessagesAsRead(chatId, partnerPhone) {
             updateUserPresence(false);
         });
 
-        // 2. Typing Indicator Sender Function
         function handleUserTyping() {
             if (!currentActiveChatId) return;
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             const db = firebase.firestore();
 
-            // Set typing true in chat room
             db.collection("chats").doc(currentActiveChatId).set({
                 typing: { [myPhone]: true }
             }, { merge: true });
 
-            // 2 second baad automatically typing band karein
             clearTimeout(typingTimeout);
             typingTimeout = setTimeout(() => {
                 db.collection("chats").doc(currentActiveChatId).set({
@@ -2121,7 +1993,6 @@ function markMessagesAsRead(chatId, partnerPhone) {
             }, 2000);
         }
 
-        // 3. Last Seen Formatter
         function formatLastSeen(timestamp) {
             if (!timestamp) return "offline";
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -2145,7 +2016,6 @@ function markMessagesAsRead(chatId, partnerPhone) {
             return `Last seen ${day}/${month} at ${timeStr}`;
         }
 
-        // 4. Tick Generator
         function getTickHtml(msg, isMe) {
             if (!isMe) return '';
 
@@ -2158,7 +2028,6 @@ function markMessagesAsRead(chatId, partnerPhone) {
             }
         }
 
-        // 5. Index-Free Mark As Read (Fixes Blue Ticks not showing)
         function markMessagesAsRead(chatId, partnerPhone) {
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -2190,7 +2059,6 @@ function markMessagesAsRead(chatId, partnerPhone) {
                 .catch(err => console.error("Error marking read:", err));
         }
 
-        // 6. Incoming Messages Delivery Sync
         function markIncomingMessagesAsDelivered() {
             const myPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
@@ -2213,7 +2081,6 @@ function markMessagesAsRead(chatId, partnerPhone) {
                 })
                 .catch(err => console.log("Delivered sync note:", err.message));
         }
-
     </script>
 </body>
 </html>
