@@ -523,7 +523,7 @@
             </div>
         </div>
 
-        <!-- Voice / Video Call Simulation Modal -->
+       <!-- Voice / Video Call Simulation Modal -->
         <div class="call-modal" id="callModal">
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
                 <img src="" id="callAvatar" class="call-user-avatar" alt="Avatar">
@@ -538,8 +538,33 @@
             </div>
         </div>
 
-        <div class="screens-wrapper show-screen-1" id="screensWrapper">
-            
+        <!-- ================= YAHAN PASTE HOGA ================= -->
+        <!-- Audio Ringtones (Free CDN Links) -->
+        <audio id="ringtoneAudio" loop src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+        <audio id="dialtoneAudio" loop src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
+
+        <!-- Incoming Call Modal -->
+        <div class="call-modal" id="incomingCallModal">
+            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                <img src="" id="incomingAvatar" class="call-user-avatar" alt="Avatar">
+                <h2 style="color: white; font-size: 22px; font-weight: 700;" id="incomingName">Ali Raza</h2>
+                <p style="color: #ec4899; font-size: 14px; font-weight: 600;" id="incomingType">Incoming Voice Call...</p>
+            </div>
+            <div class="call-controls" style="gap: 40px;">
+                <div class="call-btn-round" style="background: #ef4444; width: 60px; height: 60px;" onclick="declineIncomingCall()">
+                    <i class="fa-solid fa-phone-slash"></i>
+                </div>
+                <div class="call-btn-round" style="background: #10b981; width: 60px; height: 60px;" onclick="acceptIncomingCall()">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remote Audio Element -->
+        <audio id="remoteAudioStream" autoplay></audio>
+        <!-- ==================================================== -->
+
+        <div class="screens-wrapper show-screen-1" id="screensWrapper">            
             <!-- ================= SCREEN 1: WELCOME ================= -->
             <div class="screen" id="welcomeScreen">
                 <div class="welcome-top">
@@ -2081,6 +2106,305 @@
                 })
                 .catch(err => console.log("Delivered sync note:", err.message));
         }
+
+// WebRTC Configuration (Google Public STUN Servers)
+const rtcServers = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+};
+
+let peerConnection = null;
+let localMediaStream = null;
+let currentCallDocId = null;
+let unsubscribeCurrentCall = null;
+let incomingCallData = null;
+
+const ringtoneAudio = document.getElementById('ringtoneAudio');
+const dialtoneAudio = document.getElementById('dialtoneAudio');
+const remoteAudioStream = document.getElementById('remoteAudioStream');
+
+function listenForIncomingCalls() {
+    let myPhone = localStorage.getItem('wepzi_logged_in_phone');
+    if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+
+    const db = firebase.firestore();
+
+    // Listen to incoming ringing calls targeted to my number
+    db.collection("calls")
+        .where("receiver", "==", myPhone)
+        .where("status", "==", "ringing")
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    incomingCallData = change.doc.data();
+                    incomingCallData.id = change.doc.id;
+                    showIncomingCallUI(incomingCallData);
+                }
+            });
+        });
+}
+
+function showIncomingCallUI(callData) {
+    document.getElementById('incomingName').innerText = callData.callerName || "Unknown";
+    document.getElementById('incomingAvatar').src = callData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+    document.getElementById('incomingType').innerText = `Incoming ${callData.type === 'video' ? 'Video' : 'Voice'} Call...`;
+    
+    document.getElementById('incomingCallModal').classList.add('show');
+    
+    // Play Ringtone
+    ringtoneAudio.currentTime = 0;
+    ringtoneAudio.play().catch(() => {});
+}
+
+async function startCall(type) {
+    const partnerPhone = currentChatPartnerPhone;
+    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+    const myName = fullNameInput.value || "Me";
+    const myAvatar = avatarPreview.src;
+
+    if (!partnerPhone || !myPhone) {
+        alert("Pehle contact select karein.");
+        return;
+    }
+
+    // Modal UI set karein
+    document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
+    document.getElementById('callAvatar').src = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+    document.getElementById('callStatusText').innerText = "Ringing...";
+    document.getElementById('callTimer').innerText = "00:00";
+    document.getElementById('callModal').classList.add('show');
+
+    // Dial tone play karein
+    dialtoneAudio.currentTime = 0;
+    dialtoneAudio.play().catch(() => {});
+
+    try {
+        // 1. Mic audio stream lein
+        localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+
+        // 2. RTCPeerConnection banayein
+        peerConnection = new RTCPeerConnection(rtcServers);
+
+        // Local tracks add karein
+        localMediaStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localMediaStream);
+        });
+
+        // Remote audio handle karein
+        peerConnection.ontrack = (event) => {
+            remoteAudioStream.srcObject = event.streams[0];
+        };
+
+        const db = firebase.firestore();
+        const callDoc = db.collection("calls").doc();
+        currentCallDocId = callDoc.id;
+
+        const offerCandidates = callDoc.collection("offerCandidates");
+        const answerCandidates = callDoc.collection("answerCandidates");
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                offerCandidates.add(event.candidate.toJSON());
+            }
+        };
+
+        // 3. Offer SDP create karein
+        const offerDescription = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offerDescription);
+
+        await callDoc.set({
+            caller: myPhone,
+            callerName: myName,
+            callerAvatar: myAvatar,
+            receiver: partnerPhone,
+            type: type,
+            status: "ringing",
+            offer: { sdp: offerDescription.sdp, type: offerDescription.type },
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 4. Listen for Receiver's Answer
+        unsubscribeCurrentCall = callDoc.onSnapshot(async (snapshot) => {
+            const data = snapshot.data();
+            if (!data) return;
+
+            if (data.status === "connected" && !peerConnection.currentRemoteDescription && data.answer) {
+                // Call Pick Ho Gayi!
+                dialtoneAudio.pause();
+                document.getElementById('callStatusText').innerText = `${type === 'video' ? 'Video' : 'Voice'} Call Connected`;
+                
+                const answerDescription = new RTCSessionDescription(data.answer);
+                await peerConnection.setRemoteDescription(answerDescription);
+
+                // Start Live Call Timer
+                startCallDurationTimer();
+            }
+
+            if (data.status === "declined" || data.status === "ended") {
+                endCallUI();
+            }
+        });
+
+        // Listen for Answer ICE Candidates
+        answerCandidates.onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const candidate = new RTCIceCandidate(change.doc.data());
+                    peerConnection.addIceCandidate(candidate).catch(() => {});
+                }
+            });
+        });
+
+    } catch (err) {
+        console.error("Call error:", err);
+        dialtoneAudio.pause();
+        alert("Microphone permission allow karein: " + err.message);
+        endCall();
+    }
+}
+
+async function acceptIncomingCall() {
+    if (!incomingCallData) return;
+
+    ringtoneAudio.pause();
+    document.getElementById('incomingCallModal').classList.remove('show');
+
+    // Caller Screen jaisi UI open karein
+    document.getElementById('callName').innerText = incomingCallData.callerName;
+    document.getElementById('callAvatar').src = incomingCallData.callerAvatar;
+    document.getElementById('callStatusText').innerText = `${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call Connected`;
+    document.getElementById('callTimer').innerText = "00:00";
+    document.getElementById('callModal').classList.add('show');
+
+    currentCallDocId = incomingCallData.id;
+    const db = firebase.firestore();
+    const callDoc = db.collection("calls").doc(currentCallDocId);
+
+    try {
+        localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.type === 'video' });
+        peerConnection = new RTCPeerConnection(rtcServers);
+
+        localMediaStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localMediaStream);
+        });
+
+        peerConnection.ontrack = (event) => {
+            remoteAudioStream.srcObject = event.streams[0];
+        };
+
+        const offerCandidates = callDoc.collection("offerCandidates");
+        const answerCandidates = callDoc.collection("answerCandidates");
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                answerCandidates.add(event.candidate.toJSON());
+            }
+        };
+
+        // Remote Offer Set karein
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+
+        // Answer SDP generate karein
+        const answerDescription = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answerDescription);
+
+        // Firestore update karein taake caller ko pata chale call pick ho gayi hai
+        await callDoc.update({
+            answer: { sdp: answerDescription.sdp, type: answerDescription.type },
+            status: "connected"
+        });
+
+        // Remote Offer ICE candidates add karein
+        offerCandidates.onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const candidate = new RTCIceCandidate(change.doc.data());
+                    peerConnection.addIceCandidate(candidate).catch(() => {});
+                }
+            });
+        });
+
+        // Start Duration Timer
+        startCallDurationTimer();
+
+        // Listen if caller cuts the call
+        unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
+            const data = snapshot.data();
+            if (data && (data.status === "ended" || data.status === "declined")) {
+                endCallUI();
+            }
+        });
+
+    } catch (err) {
+        console.error("Accept fail:", err);
+        alert("Call connect nahi ho saki: " + err.message);
+        endCall();
+    }
+}
+
+async function declineIncomingCall() {
+    ringtoneAudio.pause();
+    document.getElementById('incomingCallModal').classList.remove('show');
+
+    if (incomingCallData && incomingCallData.id) {
+        firebase.firestore().collection("calls").doc(incomingCallData.id).update({
+            status: "declined"
+        }).catch(() => {});
+    }
+    incomingCallData = null;
+}
+
+function startCallDurationTimer() {
+    clearInterval(activeCallTimerInterval);
+    callSeconds = 0;
+    activeCallTimerInterval = setInterval(() => {
+        callSeconds++;
+        const mins = Math.floor(callSeconds / 60).toString().padStart(2, '0');
+        const secs = (callSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('callTimer').innerText = `${mins}:${secs}`;
+    }, 1000);
+}
+
+async function endCall() {
+    dialtoneAudio.pause();
+    ringtoneAudio.pause();
+
+    if (currentCallDocId) {
+        firebase.firestore().collection("calls").doc(currentCallDocId).update({
+            status: "ended"
+        }).catch(() => {});
+    }
+
+    endCallUI();
+}
+
+function endCallUI() {
+    dialtoneAudio.pause();
+    ringtoneAudio.pause();
+    clearInterval(activeCallTimerInterval);
+
+    if (localMediaStream) {
+        localMediaStream.getTracks().forEach(track => track.stop());
+        localMediaStream = null;
+    }
+
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+    }
+
+    if (unsubscribeCurrentCall) {
+        unsubscribeCurrentCall();
+        unsubscribeCurrentCall = null;
+    }
+
+    document.getElementById('callModal').classList.remove('show');
+    document.getElementById('incomingCallModal').classList.remove('show');
+    currentCallDocId = null;
+}
+
     </script>
 </body>
 </html>
