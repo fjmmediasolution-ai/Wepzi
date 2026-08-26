@@ -7,7 +7,7 @@
     <!-- FontAwesome 6 for High-Quality Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Firebase SDKs (Compat version for reliable standalone execution) -->
+    <!-- Google Firebase SDKs (Compat version) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -72,7 +72,7 @@
             }
         }
 
-        /* 6-Screen Smooth Slider */
+        /* 6-Screen Slider */
         .screens-wrapper {
             display: flex;
             width: 600%;
@@ -344,7 +344,7 @@
         .msg-received { background: var(--box-bg); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.03); }
         .msg-sent { background: var(--gradient-msg-me); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25); }
 
-        /* Online, Offline & Typing Styles */
+        /* Online & Typing Styles */
         .status-online-text {
             color: #10b981 !important;
             font-weight: 600;
@@ -361,28 +361,11 @@
             border-radius: 50%;
             display: inline-block;
         }
-        .status-offline-text {
-            color: var(--text-muted) !important;
-            font-size: 11px;
-            font-weight: 500;
-        }
-        .status-typing-text {
-            color: #c084fc !important;
-            font-weight: 700;
-            font-size: 11.5px;
-            letter-spacing: 0.3px;
-        }
+        .status-offline-text { color: var(--text-muted) !important; font-size: 11px; font-weight: 500; }
+        .status-typing-text { color: #c084fc !important; font-weight: 700; font-size: 11.5px; letter-spacing: 0.3px; }
 
-        /* Message Ticks & Meta */
-        .msg-meta {
-            font-size: 9.5px;
-            color: rgba(255, 255, 255, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 4px;
-            margin-top: 4px;
-        }
+        /* Message Ticks */
+        .msg-meta { font-size: 9.5px; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 4px; }
         .tick-icon { font-size: 11px; line-height: 1; }
         .tick-sent, .tick-delivered { color: rgba(255, 255, 255, 0.6); }
         .tick-read { color: #38bdf8 !important; }
@@ -414,7 +397,7 @@
         .chat-input-wrapper i { color: var(--text-muted); cursor: pointer; font-size: 17px; }
         .action-btn-circle { background: var(--accent-purple); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35); flex-shrink: 0; }
 
-        /* Webpay Wallet Card */
+        /* Webpay Card */
         .webpay-card {
             background: var(--gradient-webpay);
             border: 1.5px solid #7c3aed;
@@ -523,7 +506,7 @@
             </div>
         </div>
 
-       <!-- Voice / Video Call Simulation Modal -->
+        <!-- Active / Outgoing Call Modal -->
         <div class="call-modal" id="callModal">
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
                 <img src="" id="callAvatar" class="call-user-avatar" alt="Avatar">
@@ -538,33 +521,26 @@
             </div>
         </div>
 
-        <!-- ================= YAHAN PASTE HOGA ================= -->
-        <!-- Audio Ringtones (Free CDN Links) -->
-        <audio id="ringtoneAudio" loop src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-        <audio id="dialtoneAudio" loop src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
-
-        <!-- Incoming Call Modal -->
+        <!-- Incoming Call Modal Screen -->
         <div class="call-modal" id="incomingCallModal">
             <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
                 <img src="" id="incomingAvatar" class="call-user-avatar" alt="Avatar">
-                <h2 style="color: white; font-size: 22px; font-weight: 700;" id="incomingName">Ali Raza</h2>
+                <h2 style="color: white; font-size: 22px; font-weight: 700;" id="incomingName">User</h2>
                 <p style="color: #ec4899; font-size: 14px; font-weight: 600;" id="incomingType">Incoming Voice Call...</p>
             </div>
             <div class="call-controls" style="gap: 40px;">
-                <div class="call-btn-round" style="background: #ef4444; width: 60px; height: 60px;" onclick="declineIncomingCall()">
-                    <i class="fa-solid fa-phone-slash"></i>
-                </div>
-                <div class="call-btn-round" style="background: #10b981; width: 60px; height: 60px;" onclick="acceptIncomingCall()">
-                    <i class="fa-solid fa-phone"></i>
-                </div>
+                <div class="call-btn-round" style="background: #ef4444; width: 60px; height: 60px;" onclick="declineIncomingCall()"><i class="fa-solid fa-phone-slash"></i></div>
+                <div class="call-btn-round" style="background: #10b981; width: 60px; height: 60px;" onclick="acceptIncomingCall()"><i class="fa-solid fa-phone"></i></div>
             </div>
         </div>
 
-        <!-- Remote Audio Element -->
+        <!-- Audio Elements for Ringing, Dialtone & Remote Voice -->
+        <audio id="ringtoneAudio" loop src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+        <audio id="dialtoneAudio" loop src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
         <audio id="remoteAudioStream" autoplay></audio>
-        <!-- ==================================================== -->
 
-        <div class="screens-wrapper show-screen-1" id="screensWrapper">            
+        <div class="screens-wrapper show-screen-1" id="screensWrapper">
+            
             <!-- ================= SCREEN 1: WELCOME ================= -->
             <div class="screen" id="welcomeScreen">
                 <div class="welcome-top">
@@ -809,7 +785,7 @@
 
                 <!-- 1. CHATS TAB VIEW -->
                 <div id="tabChatsView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                    <!-- Status Stories -->
+                    <!-- Status Stories (Clean User Profile Only) -->
                     <div class="status-container">
                         <div class="status-card" onclick="switchTab('status')">
                             <div class="status-avatar-wrapper">
@@ -817,12 +793,6 @@
                                 <div class="status-add-icon"><i class="fa-solid fa-plus"></i></div>
                             </div>
                             <span class="status-label">My Status</span>
-                        </div>
-                        <div class="status-card" onclick="alert('Viewing Demo Status')">
-                            <div class="status-avatar-wrapper">
-                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Status">
-                            </div>
-                            <span class="status-label">Wepzi Official</span>
                         </div>
                     </div>
 
@@ -866,14 +836,6 @@
                         </div>
                         <i class="fa-solid fa-camera" style="color: var(--accent-purple); font-size: 18px;" onclick="alert('Camera activated for status')"></i>
                     </div>
-                    <h4 style="color: var(--text-muted); font-size: 12px; font-weight: 700; margin: 15px 0 10px 0; text-transform: uppercase;">Recent Updates</h4>
-                    <div class="chat-row-item" onclick="alert('Viewing Wepzi Announcement')">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="chat-row-avatar" style="border: 2px solid #8b5cf6;" alt="Avatar">
-                        <div class="chat-row-details">
-                            <span class="chat-row-name">Wepzi Official</span>
-                            <span class="chat-row-time">10 minutes ago</span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- 4. SETTINGS TAB VIEW -->
@@ -893,76 +855,80 @@
                         </div>
 
                         <!-- Webpay Wallet Card -->
-                        <div class="webpay-card">
-                            <div class="webpay-card-header">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
-                                    <span style="color: #ffffff; font-weight: 800; font-size: 15px;">Webpay Account</span>
-                                </div>
-                                <span class="webpay-badge-active">ACTIVE</span>
-                            </div>
-                            
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Registered Mobile:</span>
-                                <span class="webpay-data-val" id="webpayLinkedNumber">+92 300 0000000</span>
-                            </div>
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Webpay Account ID:</span>
-                                <span class="webpay-data-val" style="color: #c084fc;" id="webpayAccountId">WP-3000000000</span>
-                            </div>
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Wallet Balance:</span>
-                                <span class="webpay-data-val" style="color: #10b981;" id="webpayBalance">Rs. 0.00 PKR</span>
-                            </div>
-
-                            <div class="webpay-actions">
-                                <div class="webpay-btn" onclick="openWebpayActionModal('topup')"><i class="fa-solid fa-plus-circle"></i> Top Up</div>
-                                <div class="webpay-btn" onclick="openWebpayActionModal('send')"><i class="fa-solid fa-paper-plane"></i> Send Money</div>
-                            </div>
+                <div class="webpay-card">
+                    <div class="webpay-card-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
+                            <span style="color: #ffffff; font-weight: 800; font-size: 15px;">Webpay Account</span>
                         </div>
+                        <span class="webpay-badge-active">ACTIVE</span>
+                    </div>
+                    
+                    <div class="webpay-data-row">
+                        <span class="webpay-data-label">Registered Mobile:</span>
+                        <span class="webpay-data-val" id="webpayLinkedNumber">+92 300 0000000</span>
+                    </div>
+                    <div class="webpay-data-row">
+                        <span class="webpay-data-label">Webpay Account ID:</span>
+                        <span class="webpay-data-val" style="color: #c084fc;" id="webpayAccountId">WP-3000000000</span>
+                    </div>
+                    <div class="webpay-data-row">
+                        <span class="webpay-data-label">Wallet Balance:</span>
+                        <span class="webpay-data-val" style="color: #10b981;" id="webpayBalance">Rs. 0.00 PKR</span>
+                    </div>
 
-                        <!-- System Settings -->
-                        <div class="settings-item" onclick="alert('Account & Security settings')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
-                                <div class="settings-info"><h4>Account</h4><p>Security notifications, two-step verification</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                        </div>
+                    <div class="webpay-actions">
+                        <div class="webpay-btn" onclick="openWebpayActionModal('topup')"><i class="fa-solid fa-plus-circle"></i> Top Up</div>
+                        <div class="webpay-btn" onclick="openWebpayActionModal('send')"><i class="fa-solid fa-paper-plane"></i> Send Money</div>
+                    </div>
+                </div>
 
-                        <!-- Delete Account Permanently Item -->
-                        <div class="settings-item" onclick="deleteAccountPermanently()" style="border: 1px solid rgba(239, 68, 68, 0.4); margin-top: 10px; background: rgba(239, 68, 68, 0.05);">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #b91c1c;"><i class="fa-solid fa-trash-can"></i></div>
-                                <div class="settings-info"><h4 style="color: #ef4444;">Delete My Account</h4><p>Permanently remove account, contacts and chats</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: #ef4444; font-size: 11px;"></i>
+                <!-- ================= PART 3 KA HTML YAHAN PASTE HOGA ================= -->
+                <!-- Microphone Test Item -->
+                <div class="settings-item" onclick="testMicrophone()">
+                    <div class="settings-left">
+                        <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-microphone"></i></div>
+                        <div class="settings-info">
+                            <h4>Test Microphone</h4>
+                            <p id="micStatusText">Tap to check mic permissions</p>
                         </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                </div>
 
-                        <div class="settings-item" onclick="alert('Privacy configurations')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-lock"></i></div>
-                                <div class="settings-info"><h4>Privacy</h4><p>Block contacts, live location, last seen</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                <!-- Call Ringtone Toggle Item -->
+                <div class="settings-item" onclick="toggleSetting('ringtone')">
+                    <div class="settings-left">
+                        <div class="settings-icon-box" style="background: #8b5cf6;"><i class="fa-solid fa-bell"></i></div>
+                        <div class="settings-info">
+                            <h4>Call Ringtone</h4>
+                            <p id="ringtoneStatusText">Enabled</p>
                         </div>
+                    </div>
+                    <i class="fa-solid fa-toggle-on" id="ringtoneToggleIcon" style="color: #10b981; font-size: 22px;"></i>
+                </div>
 
-                        <div class="settings-item" onclick="alert('Chat theme & wallpaper settings')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #ec4899;"><i class="fa-solid fa-comment-dots"></i></div>
-                                <div class="settings-info"><h4>Chats</h4><p>Theme, wallpapers, chat history</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                <!-- Vibrate Toggle Item -->
+                <div class="settings-item" onclick="toggleSetting('vibrate')">
+                    <div class="settings-left">
+                        <div class="settings-icon-box" style="background: #f59e0b;"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                        <div class="settings-info">
+                            <h4>Vibrate on Call</h4>
+                            <p id="vibrateStatusText">Enabled</p>
                         </div>
+                    </div>
+                    <i class="fa-solid fa-toggle-on" id="vibrateToggleIcon" style="color: #10b981; font-size: 22px;"></i>
+                </div>
+                <!-- ================================================================== -->
 
-                        <!-- Logout Item -->
-                        <div class="settings-item" onclick="logoutUser()" style="border: 1px solid rgba(239, 68, 68, 0.25);">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #ef4444;"><i class="fa-solid fa-right-from-bracket"></i></div>
-                                <div class="settings-info"><h4 style="color: #ef4444;">Log Out</h4><p>Sign out from this device</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                        </div>
+                <!-- Uske baad Account Settings shuru hogi -->
+                <div class="settings-item" onclick="alert('Account & Security settings')">
+                    <div class="settings-left">
+                        <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
+                        <div class="settings-info"><h4>Account</h4><p>Security notifications, two-step verification</p></div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                </div>
 
                     </div>
                 </div>
@@ -1032,7 +998,15 @@
             firebase.initializeApp(firebaseConfig);
         }
 
-        // Global Elements
+        // WebRTC Configuration (Google STUN)
+        const rtcServers = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // Global UI Elements
         const wrapper = document.getElementById('screensWrapper');
         const phoneInput = document.getElementById('phoneNumber');
         const displayUserPhone = document.getElementById('displayUserPhone');
@@ -1057,6 +1031,11 @@
         const chatMessageInput = document.getElementById('chatMessageInput');
         const attachmentsPanel = document.getElementById('attachmentsPanel');
 
+        // Audio and Call Streams
+        const ringtoneAudio = document.getElementById('ringtoneAudio');
+        const dialtoneAudio = document.getElementById('dialtoneAudio');
+        const remoteAudioStream = document.getElementById('remoteAudioStream');
+
         let generatedOTP = null;
         let countdownTimer = null;
         let timeLeft = 45;
@@ -1072,11 +1051,19 @@
         let unsubscribeChatDoc = null;
         let typingTimeout = null;
 
+        // Calling state variables
+        let peerConnection = null;
+        let localMediaStream = null;
+        let currentCallDocId = null;
+        let unsubscribeCurrentCall = null;
+        let incomingCallData = null;
         let activeCallTimerInterval = null;
         let callSeconds = 0;
         let currentWebpayAction = null;
 
-                // Helper: Number ko har jagah +92 format mein convert karega
+        let mockCalls = [];
+
+        // Number Standardizer Helper (+923XXXXXXXXX)
         function normalizePhoneNumber(phone) {
             if (!phone) return "";
             let clean = phone.replace(/[^0-9]/g, '');
@@ -1089,48 +1076,6 @@
             }
             return "+" + clean;
         }
-
-        // Incoming Call Listener (Doosre Phone Par Ring Bajaega)
-        function listenForIncomingCalls() {
-            let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-
-            const myPhone = normalizePhoneNumber(rawPhone);
-            const db = firebase.firestore();
-
-            console.log("Listening for calls on:", myPhone);
-
-            db.collection("calls")
-                .where("receiver", "==", myPhone)
-                .where("status", "==", "ringing")
-                .onSnapshot((snapshot) => {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            incomingCallData = change.doc.data();
-                            incomingCallData.id = change.doc.id;
-                            
-                            document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
-                            document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-                            document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
-                            document.getElementById('incomingCallModal').classList.add('show');
-
-                            if (ringtoneAudio) {
-                                ringtoneAudio.currentTime = 0;
-                                ringtoneAudio.play().catch(e => console.log("Audio autoplay note:", e));
-                            }
-                        }
-                    });
-                }, (error) => {
-                    console.error("Call listener error:", error);
-                });
-        }
-        
-
-        let mockCalls = [
-            { name: "Wepzi Support", type: "incoming", status: "Missed Voice Call", time: "10:30 AM", avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" }
-        ];
-
-        
 
         // Screen Navigator
         function goToScreen(screenNumber) {
@@ -1160,6 +1105,7 @@
                 syncWebpayUI();
                 listenToMyChats();
                 renderCallsList();
+                listenForIncomingCalls();
             }
         }
 
@@ -1173,7 +1119,7 @@
                 return;
             }
 
-            const formattedPhoneNumber = "+92" + rawPhone;
+            const formattedPhoneNumber = normalizePhoneNumber(rawPhone);
             displayUserPhone.innerText = formattedPhoneNumber;
 
             const sendBtn = document.getElementById('sendOtpBtn');
@@ -1246,9 +1192,7 @@
                 if (generatedOTP && enteredCode === generatedOTP) {
                     clearInterval(countdownTimer);
                     
-                    let rawPhone = phoneInput.value.trim();
-                    if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1);
-                    const formattedPhoneNumber = "+92" + rawPhone;
+                    const formattedPhoneNumber = normalizePhoneNumber(phoneInput.value.trim());
 
                     if (window.firebase && firebase.apps.length > 0) {
                         try {
@@ -1264,7 +1208,7 @@
                                     avatar: existingData.avatar,
                                     phone: existingData.phoneNumber,
                                     webpay: existingData.webpay || {
-                                        accountId: "WP-" + rawPhone,
+                                        accountId: "WP-" + formattedPhoneNumber.replace("+92",""),
                                         linkedNumber: existingData.phoneNumber,
                                         status: "Active",
                                         balance: 0.00
@@ -1362,14 +1306,12 @@
                 return;
             }
 
-            let rawPhone = phoneInput.value.trim();
-            if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1);
-            const formattedPhoneNumber = "+92" + rawPhone;
+            const formattedPhoneNumber = normalizePhoneNumber(phoneInput.value.trim());
             const wepziId = wepziIdDisplay.innerText;
             const avatarUrl = avatarPreview.src;
 
             const webpayAccount = {
-                accountId: "WP-" + rawPhone,
+                accountId: "WP-" + formattedPhoneNumber.replace("+92",""),
                 linkedNumber: formattedPhoneNumber,
                 status: "Active",
                 balance: 0.00,
@@ -1420,9 +1362,10 @@
 
         // ================= SCREEN 6: REAL-TIME CHATS =================
         function listenToMyChats() {
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+            const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawMyPhone || !window.firebase || firebase.apps.length === 0) return;
 
+            const myPhone = normalizePhoneNumber(rawMyPhone);
             const db = firebase.firestore();
 
             if (unsubscribeChatsList) unsubscribeChatsList();
@@ -1476,7 +1419,7 @@
 
         function openChatWindow(chatId, name, avatar, partnerPhone) {
             currentActiveChatId = chatId;
-            currentChatPartnerPhone = partnerPhone;
+            currentChatPartnerPhone = normalizePhoneNumber(partnerPhone);
             currentChatPartnerName = name;
             currentChatPartnerAvatar = avatar;
             
@@ -1486,14 +1429,13 @@
             chatWindow.classList.add('open');
 
             const db = firebase.firestore();
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
 
             let partnerIsOnline = false;
             let partnerLastSeen = null;
 
-            // 1. Partner ka Real-Time Online / Offline / Last Seen Listener
             if (unsubscribePartnerPresence) unsubscribePartnerPresence();
-            unsubscribePartnerPresence = db.collection("users").doc(partnerPhone)
+            unsubscribePartnerPresence = db.collection("users").doc(currentChatPartnerPhone)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const data = doc.data();
@@ -1515,13 +1457,12 @@
                     }
                 });
 
-            // 2. Real-time "Typing..." Listener
             if (unsubscribeChatDoc) unsubscribeChatDoc();
             unsubscribeChatDoc = db.collection("chats").doc(chatId)
                 .onSnapshot((doc) => {
                     if (doc.exists) {
                         const chatData = doc.data();
-                        const isPartnerTyping = chatData.typing && chatData.typing[partnerPhone] === true;
+                        const isPartnerTyping = chatData.typing && chatData.typing[currentChatPartnerPhone] === true;
 
                         if (isPartnerTyping) {
                             statusEl.innerText = "typing...";
@@ -1538,12 +1479,10 @@
                     }
                 });
 
-            // 3. Mark Messages as Read (Blue Tick)
-            markMessagesAsRead(chatId, partnerPhone);
+            markMessagesAsRead(chatId, currentChatPartnerPhone);
 
             if (unsubscribeMessages) unsubscribeMessages();
 
-            // 4. Messages Stream
             unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
                 .orderBy("timestamp", "asc")
                 .onSnapshot((snapshot) => {
@@ -1575,13 +1514,13 @@
                     });
 
                     chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
-                    markMessagesAsRead(chatId, partnerPhone);
+                    markMessagesAsRead(chatId, currentChatPartnerPhone);
                 });
         }
 
         function closeChatWindow() {
             if (currentActiveChatId) {
-                const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+                const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
                 if (myPhone && window.firebase && firebase.apps.length > 0) {
                     firebase.firestore().collection("chats").doc(currentActiveChatId).set({
                         typing: { [myPhone]: false }
@@ -1601,12 +1540,11 @@
             const inputVal = chatMessageInput.value.trim();
             if (!inputVal || !currentActiveChatId) return;
 
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
             const db = firebase.firestore();
 
             chatMessageInput.value = '';
 
-            // Reset typing
             db.collection("chats").doc(currentActiveChatId).set({
                 typing: { [myPhone]: false }
             }, { merge: true });
@@ -1638,7 +1576,7 @@
             }
         }
 
-        // ================= CONTACT LOOKUP =================
+        // ================= CONTACT LOOKUP & VALIDATION =================
         function openAddModal() {
             plusDropdown.classList.remove('show');
             addContactModal.classList.add('show');
@@ -1653,11 +1591,9 @@
 
         async function saveNewContact() {
             const rawPhone = document.getElementById('newContactPhone').value.trim();
-            let contactPhone = rawPhone.startsWith("0") ? rawPhone.substring(1) : rawPhone;
-            if (!contactPhone.startsWith("+92")) contactPhone = "+92" + contactPhone;
-
+            const contactPhone = normalizePhoneNumber(rawPhone);
             const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
 
             if (!rawPhone) {
                 alert("Barah-e-karam phone number enter karein!");
@@ -1736,7 +1672,7 @@
             const savedSession = localStorage.getItem('wepzi_user_session');
             if (savedSession) {
                 const user = JSON.parse(savedSession);
-                const userPhone = user.phone || ("+92" + phoneInput.value);
+                const userPhone = user.phone || normalizePhoneNumber(phoneInput.value);
                 const rawNo = userPhone.replace("+92", "");
 
                 if (document.getElementById('webpayLinkedNumber')) {
@@ -1798,8 +1734,41 @@
             closeWebpayActionModal();
         }
 
-        // ================= CALLING SIMULATION =================
         // ================= LIVE WEBRTC CALLING SYSTEM =================
+        function listenForIncomingCalls() {
+            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
+
+            const myPhone = normalizePhoneNumber(rawPhone);
+            const db = firebase.firestore();
+
+            console.log("Listening for incoming calls on:", myPhone);
+
+            db.collection("calls")
+                .where("receiver", "==", myPhone)
+                .where("status", "==", "ringing")
+                .onSnapshot((snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            incomingCallData = change.doc.data();
+                            incomingCallData.id = change.doc.id;
+                            
+                            document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
+                            document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+                            document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
+                            document.getElementById('incomingCallModal').classList.add('show');
+
+                            if (ringtoneAudio) {
+                                ringtoneAudio.currentTime = 0;
+                                ringtoneAudio.play().catch(e => console.log("Audio autoplay note:", e));
+                            }
+                        }
+                    });
+                }, (error) => {
+                    console.error("Call listener error:", error);
+                });
+        }
+
         async function startCall(type) {
             const rawPartner = currentChatPartnerPhone;
             const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
@@ -1814,7 +1783,7 @@
                 return;
             }
 
-            // Caller UI ko Ringing par set karein
+            // Caller UI Setup
             document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
             document.getElementById('callAvatar').src = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
             document.getElementById('callStatusText').innerText = "Ringing...";
@@ -1827,7 +1796,6 @@
             }
 
             try {
-                // 1. Microphone access
                 localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
                 peerConnection = new RTCPeerConnection(rtcServers);
 
@@ -1852,7 +1820,6 @@
                     }
                 };
 
-                // 2. Offer create karein
                 const offerDescription = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offerDescription);
 
@@ -1867,7 +1834,6 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 3. Receiver ke pick karne ka intezar
                 unsubscribeCurrentCall = callDoc.onSnapshot(async (snapshot) => {
                     const data = snapshot.data();
                     if (!data) return;
@@ -1895,6 +1861,15 @@
                         }
                     });
                 });
+
+                mockCalls.unshift({
+                    name: currentChatPartnerName || "Contact",
+                    type: "outgoing",
+                    status: `${type === 'video' ? 'Video' : 'Voice'} Call`,
+                    time: "Just now",
+                    avatar: currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
+                });
+                renderCallsList();
 
             } catch (err) {
                 console.error("Call error:", err);
@@ -2036,7 +2011,7 @@
             document.getElementById('incomingCallModal').classList.remove('show');
             currentCallDocId = null;
         }
-        
+
         function renderCallsList() {
             const container = document.getElementById('callsListContainer');
             if (!container) return;
@@ -2191,7 +2166,7 @@
             const confirmDelete = confirm("⚠️ KYA AAP WAQAI APNA ACCOUNT DELETE KARNA CHAHTE HAIN?\n\nAapka profile, saved contacts aur tamam chats hamesha ke liye delete ho jayengi.");
             if (!confirmDelete) return;
 
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
             if (!myPhone) return;
 
             const db = firebase.firestore();
@@ -2222,6 +2197,7 @@
                     }
 
                     goToScreen(6);
+                    listenForIncomingCalls();
                     return;
                 } catch (e) {
                     console.error("Session parse error:", e);
@@ -2233,9 +2209,9 @@
 
         // ================= PRESENCE, TYPING & TICK LOGIC =================
         function updateUserPresence(isOnline) {
-            let myPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
-            if (!myPhone.startsWith("+92")) myPhone = "+92" + myPhone.replace(/^0+/, '');
+            let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
+            const myPhone = normalizePhoneNumber(rawPhone);
 
             const db = firebase.firestore();
             db.collection("users").doc(myPhone).set({
@@ -2244,7 +2220,6 @@
             }, { merge: true }).catch(err => console.log("Presence err:", err));
         }
 
-        // Heartbeat timer for live online presence
         setInterval(() => {
             if (document.visibilityState === 'visible') {
                 updateUserPresence(true);
@@ -2261,7 +2236,7 @@
 
         function handleUserTyping() {
             if (!currentActiveChatId) return;
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
+            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
             const db = firebase.firestore();
 
             db.collection("chats").doc(currentActiveChatId).set({
@@ -2312,8 +2287,9 @@
         }
 
         function markMessagesAsRead(chatId, partnerPhone) {
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
+            const myPhone = normalizePhoneNumber(rawPhone);
 
             const db = firebase.firestore();
             db.collection("chats").doc(chatId).collection("messages")
@@ -2343,8 +2319,9 @@
         }
 
         function markIncomingMessagesAsDelivered() {
-            const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!myPhone || !window.firebase || firebase.apps.length === 0) return;
+            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
+            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
+            const myPhone = normalizePhoneNumber(rawPhone);
 
             const db = firebase.firestore();
             db.collectionGroup("messages")
@@ -2365,331 +2342,96 @@
                 .catch(err => console.log("Delivered sync note:", err.message));
         }
 
-// WebRTC Configuration (Google Public STUN Servers)
-const rtcServers = {
-    iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-    ]
+
+// Smart Permission Request Function
+async function getMediaStreamWithPermission(isVideo = false) {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            },
+            video: isVideo
+        });
+        return stream;
+    } catch (error) {
+        console.error("Microphone Error:", error);
+        
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            alert("⚠️ Microphone Permission Blocked!\n\nHal: Mobile Settings > Apps > Wepzi > Permissions > Microphone ko 'Allow' karein.");
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            alert("⚠️ Microphone nahi mila! Kripya apna mic check karein.");
+        } else {
+            alert("⚠️ Audio Access Error: " + error.message);
+        }
+        return null;
+    }
+}
+
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            console.log('Screen WakeLock active');
+        }
+    } catch (err) {
+        console.log('WakeLock error:', err);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock !== null) {
+        wakeLock.release();
+        wakeLock = null;
+    }
+}
+// Settings Logic
+let appSettings = JSON.parse(localStorage.getItem('wepzi_settings')) || {
+    ringtone: true,
+    vibrate: true
 };
 
-let peerConnection = null;
-let localMediaStream = null;
-let currentCallDocId = null;
-let unsubscribeCurrentCall = null;
-let incomingCallData = null;
-
-const ringtoneAudio = document.getElementById('ringtoneAudio');
-const dialtoneAudio = document.getElementById('dialtoneAudio');
-const remoteAudioStream = document.getElementById('remoteAudioStream');
-
-function listenForIncomingCalls() {
-    let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-    if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-
-    const myPhone = normalizePhoneNumber(rawPhone);
-    const db = firebase.firestore();
-
-    console.log("Listening for calls on:", myPhone);
-
-    db.collection("calls")
-        .where("receiver", "==", myPhone)
-        .where("status", "==", "ringing")
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    incomingCallData = change.doc.data();
-                    incomingCallData.id = change.doc.id;
-                    
-                    // UI Show karein
-                    document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
-                    document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-                    document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
-                    document.getElementById('incomingCallModal').classList.add('show');
-
-                    // Ringtone play karein
-                    const ringtone = document.getElementById('ringtoneAudio');
-                    if (ringtone) {
-                        ringtone.currentTime = 0;
-                        ringtone.play().catch(e => console.log("Audio autoplay blocked, user interaction needed:", e));
-                    }
-                }
-            });
-        }, (error) => {
-            console.error("Call listener error:", error);
-        });
-}
-
-function showIncomingCallUI(callData) {
-    document.getElementById('incomingName').innerText = callData.callerName || "Unknown";
-    document.getElementById('incomingAvatar').src = callData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-    document.getElementById('incomingType').innerText = `Incoming ${callData.type === 'video' ? 'Video' : 'Voice'} Call...`;
+async function testMicrophone() {
+    const statusText = document.getElementById('micStatusText');
+    statusText.innerText = "Testing mic...";
     
-    document.getElementById('incomingCallModal').classList.add('show');
-    
-    // Play Ringtone
-    ringtoneAudio.currentTime = 0;
-    ringtoneAudio.play().catch(() => {});
-}
-
-async function startCall(type) {
-    const partnerPhone = currentChatPartnerPhone;
-    const myPhone = localStorage.getItem('wepzi_logged_in_phone');
-    const myName = fullNameInput.value || "Me";
-    const myAvatar = avatarPreview.src;
-
-    if (!partnerPhone || !myPhone) {
-        alert("Pehle contact select karein.");
-        return;
-    }
-
-    // Modal UI set karein
-    document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
-    document.getElementById('callAvatar').src = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-    document.getElementById('callStatusText').innerText = "Ringing...";
-    document.getElementById('callTimer').innerText = "00:00";
-    document.getElementById('callModal').classList.add('show');
-
-    // Dial tone play karein
-    dialtoneAudio.currentTime = 0;
-    dialtoneAudio.play().catch(() => {});
-
-    try {
-        // 1. Mic audio stream lein
-        localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
-
-        // 2. RTCPeerConnection banayein
-        peerConnection = new RTCPeerConnection(rtcServers);
-
-        // Local tracks add karein
-        localMediaStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localMediaStream);
-        });
-
-        // Remote audio handle karein
-        peerConnection.ontrack = (event) => {
-            remoteAudioStream.srcObject = event.streams[0];
-        };
-
-        const db = firebase.firestore();
-        const callDoc = db.collection("calls").doc();
-        currentCallDocId = callDoc.id;
-
-        const offerCandidates = callDoc.collection("offerCandidates");
-        const answerCandidates = callDoc.collection("answerCandidates");
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                offerCandidates.add(event.candidate.toJSON());
-            }
-        };
-
-        // 3. Offer SDP create karein
-        const offerDescription = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offerDescription);
-
-        await callDoc.set({
-            caller: myPhone,
-            callerName: myName,
-            callerAvatar: myAvatar,
-            receiver: partnerPhone,
-            type: type,
-            status: "ringing",
-            offer: { sdp: offerDescription.sdp, type: offerDescription.type },
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        // 4. Listen for Receiver's Answer
-        unsubscribeCurrentCall = callDoc.onSnapshot(async (snapshot) => {
-            const data = snapshot.data();
-            if (!data) return;
-
-            if (data.status === "connected" && !peerConnection.currentRemoteDescription && data.answer) {
-                // Call Pick Ho Gayi!
-                dialtoneAudio.pause();
-                document.getElementById('callStatusText').innerText = `${type === 'video' ? 'Video' : 'Voice'} Call Connected`;
-                
-                const answerDescription = new RTCSessionDescription(data.answer);
-                await peerConnection.setRemoteDescription(answerDescription);
-
-                // Start Live Call Timer
-                startCallDurationTimer();
-            }
-
-            if (data.status === "declined" || data.status === "ended") {
-                endCallUI();
-            }
-        });
-
-        // Listen for Answer ICE Candidates
-        answerCandidates.onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const candidate = new RTCIceCandidate(change.doc.data());
-                    peerConnection.addIceCandidate(candidate).catch(() => {});
-                }
-            });
-        });
-
-    } catch (err) {
-        console.error("Call error:", err);
-        dialtoneAudio.pause();
-        alert("Microphone permission allow karein: " + err.message);
-        endCall();
+    const stream = await getMediaStreamWithPermission(false);
+    if (stream) {
+        statusText.innerText = "✅ Microphone Working & Allowed";
+        statusText.style.color = "#10b981";
+        stream.getTracks().forEach(t => t.stop()); // Stop test stream
+        alert("✅ Microphone bilkul theek kaam kar raha hai!");
+    } else {
+        statusText.innerText = "❌ Permission Denied / Error";
+        statusText.style.color = "#ef4444";
     }
 }
 
-async function acceptIncomingCall() {
-    if (!incomingCallData) return;
-
-    ringtoneAudio.pause();
-    document.getElementById('incomingCallModal').classList.remove('show');
-
-    // Caller Screen jaisi UI open karein
-    document.getElementById('callName').innerText = incomingCallData.callerName;
-    document.getElementById('callAvatar').src = incomingCallData.callerAvatar;
-    document.getElementById('callStatusText').innerText = `${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call Connected`;
-    document.getElementById('callTimer').innerText = "00:00";
-    document.getElementById('callModal').classList.add('show');
-
-    currentCallDocId = incomingCallData.id;
-    const db = firebase.firestore();
-    const callDoc = db.collection("calls").doc(currentCallDocId);
-
-    try {
-        localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.type === 'video' });
-        peerConnection = new RTCPeerConnection(rtcServers);
-
-        localMediaStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localMediaStream);
-        });
-
-        peerConnection.ontrack = (event) => {
-            remoteAudioStream.srcObject = event.streams[0];
-        };
-
-        const offerCandidates = callDoc.collection("offerCandidates");
-        const answerCandidates = callDoc.collection("answerCandidates");
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                answerCandidates.add(event.candidate.toJSON());
-            }
-        };
-
-        // Remote Offer Set karein
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
-
-        // Answer SDP generate karein
-        const answerDescription = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answerDescription);
-
-        // Firestore update karein taake caller ko pata chale call pick ho gayi hai
-        await callDoc.update({
-            answer: { sdp: answerDescription.sdp, type: answerDescription.type },
-            status: "connected"
-        });
-
-        // Remote Offer ICE candidates add karein
-        offerCandidates.onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const candidate = new RTCIceCandidate(change.doc.data());
-                    peerConnection.addIceCandidate(candidate).catch(() => {});
-                }
-            });
-        });
-
-        // Start Duration Timer
-        startCallDurationTimer();
-
-        // Listen if caller cuts the call
-        unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
-            const data = snapshot.data();
-            if (data && (data.status === "ended" || data.status === "declined")) {
-                endCallUI();
-            }
-        });
-
-    } catch (err) {
-        console.error("Accept fail:", err);
-        alert("Call connect nahi ho saki: " + err.message);
-        endCall();
-    }
+function toggleSetting(key) {
+    appSettings[key] = !appSettings[key];
+    localStorage.setItem('wepzi_settings', JSON.stringify(appSettings));
+    updateSettingsUI();
 }
 
-async function declineIncomingCall() {
-    ringtoneAudio.pause();
-    document.getElementById('incomingCallModal').classList.remove('show');
-
-    if (incomingCallData && incomingCallData.id) {
-        firebase.firestore().collection("calls").doc(incomingCallData.id).update({
-            status: "declined"
-        }).catch(() => {});
-    }
-    incomingCallData = null;
-}
-
-function startCallDurationTimer() {
-    clearInterval(activeCallTimerInterval);
-    callSeconds = 0;
-    activeCallTimerInterval = setInterval(() => {
-        callSeconds++;
-        const mins = Math.floor(callSeconds / 60).toString().padStart(2, '0');
-        const secs = (callSeconds % 60).toString().padStart(2, '0');
-        document.getElementById('callTimer').innerText = `${mins}:${secs}`;
-    }, 1000);
-}
-
-async function endCall() {
-    dialtoneAudio.pause();
-    ringtoneAudio.pause();
-
-    if (currentCallDocId) {
-        firebase.firestore().collection("calls").doc(currentCallDocId).update({
-            status: "ended"
-        }).catch(() => {});
+function updateSettingsUI() {
+    const rIcon = document.getElementById('ringtoneToggleIcon');
+    const rText = document.getElementById('ringtoneStatusText');
+    if (rIcon && rText) {
+        rIcon.className = appSettings.ringtone ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
+        rIcon.style.color = appSettings.ringtone ? "#10b981" : "var(--text-muted)";
+        rText.innerText = appSettings.ringtone ? "Enabled" : "Disabled";
     }
 
-    endCallUI();
-}
-
-function endCallUI() {
-    dialtoneAudio.pause();
-    ringtoneAudio.pause();
-    clearInterval(activeCallTimerInterval);
-
-    if (localMediaStream) {
-        localMediaStream.getTracks().forEach(track => track.stop());
-        localMediaStream = null;
+    const vIcon = document.getElementById('vibrateToggleIcon');
+    const vText = document.getElementById('vibrateStatusText');
+    if (vIcon && vText) {
+        vIcon.className = appSettings.vibrate ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
+        vIcon.style.color = appSettings.vibrate ? "#10b981" : "var(--text-muted)";
+        vText.innerText = appSettings.vibrate ? "Enabled" : "Disabled";
     }
-
-    if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-    }
-
-    if (unsubscribeCurrentCall) {
-        unsubscribeCurrentCall();
-        unsubscribeCurrentCall = null;
-    }
-
-    document.getElementById('callModal').classList.remove('show');
-    document.getElementById('incomingCallModal').classList.remove('show');
-    currentCallDocId = null;
-}
-
-function normalizePhoneNumber(phone) {
-    if (!phone) return "";
-    let clean = phone.replace(/[^0-9]/g, ''); // Tamam extra spaces/signs remove karein
-    if (clean.startsWith("92")) {
-        return "+" + clean;
-    } else if (clean.startsWith("0")) {
-        return "+92" + clean.substring(1);
-    } else if (clean.length === 10) {
-        return "+92" + clean;
-    }
-    return "+" + clean;
 }
 
     </script>
