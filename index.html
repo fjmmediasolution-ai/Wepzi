@@ -1106,6 +1106,7 @@
                 listenToMyChats();
                 renderCallsList();
                 listenForIncomingCalls();
+                updateSettingsUI(); 
             }
         }
 
@@ -1734,8 +1735,7 @@
             closeWebpayActionModal();
         }
 
-        // ================= LIVE WEBRTC CALLING SYSTEM =================
-        function listenForIncomingCalls() {
+       function listenForIncomingCalls() {
             const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
 
@@ -1758,9 +1758,15 @@
                             document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
                             document.getElementById('incomingCallModal').classList.add('show');
 
-                            if (ringtoneAudio) {
+                            // Ringtone Setting Check
+                            if (appSettings.ringtone && ringtoneAudio) {
                                 ringtoneAudio.currentTime = 0;
                                 ringtoneAudio.play().catch(e => console.log("Audio autoplay note:", e));
+                            }
+
+                            // Vibrate Setting Check
+                            if (appSettings.vibrate && 'vibrate' in navigator) {
+                                navigator.vibrate([600, 400, 600, 400, 600]);
                             }
                         }
                     });
@@ -1768,8 +1774,7 @@
                     console.error("Call listener error:", error);
                 });
         }
-
-        async function startCall(type) {
+       async function startCall(type) {
             const rawPartner = currentChatPartnerPhone;
             const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
 
@@ -1782,6 +1787,10 @@
                 alert("Pehle contact open karein!");
                 return;
             }
+
+            // 1. Smart Permission Check
+            localMediaStream = await getMediaStreamWithPermission(type === 'video');
+            if (!localMediaStream) return; // Agar permission nahi mili toh call yahin ruk jayegi
 
             // Caller UI Setup
             document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
@@ -1796,7 +1805,6 @@
             }
 
             try {
-                localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
                 peerConnection = new RTCPeerConnection(rtcServers);
 
                 localMediaStream.getTracks().forEach(track => {
@@ -1845,6 +1853,7 @@
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await peerConnection.setRemoteDescription(answerDescription);
 
+                        requestWakeLock(); // Screen on rakhein
                         startCallDurationTimer();
                     }
 
@@ -1874,7 +1883,6 @@
             } catch (err) {
                 console.error("Call error:", err);
                 if (dialtoneAudio) dialtoneAudio.pause();
-                alert("Microphone permission zaroori hai: " + err.message);
                 endCall();
             }
         }
@@ -1882,8 +1890,18 @@
         async function acceptIncomingCall() {
             if (!incomingCallData) return;
 
+            // Stop Ringtone & Vibration
             if (ringtoneAudio) ringtoneAudio.pause();
+            if ('vibrate' in navigator) navigator.vibrate(0);
+
             document.getElementById('incomingCallModal').classList.remove('show');
+
+            // Smart Permission check
+            localMediaStream = await getMediaStreamWithPermission(incomingCallData.type === 'video');
+            if (!localMediaStream) {
+                declineIncomingCall();
+                return;
+            }
 
             document.getElementById('callName').innerText = incomingCallData.callerName;
             document.getElementById('callAvatar').src = incomingCallData.callerAvatar;
@@ -1896,7 +1914,6 @@
             const callDoc = db.collection("calls").doc(currentCallDocId);
 
             try {
-                localMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: incomingCallData.type === 'video' });
                 peerConnection = new RTCPeerConnection(rtcServers);
 
                 localMediaStream.getTracks().forEach(track => {
@@ -1935,6 +1952,7 @@
                     });
                 });
 
+                requestWakeLock(); // Screen on rakhein
                 startCallDurationTimer();
 
                 unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
@@ -1946,7 +1964,6 @@
 
             } catch (err) {
                 console.error("Accept fail:", err);
-                alert("Call connect nahi ho saki: " + err.message);
                 endCall();
             }
         }
@@ -1987,9 +2004,12 @@
             endCallUI();
         }
 
-        function endCallUI() {
+function endCallUI() {
             if (dialtoneAudio) dialtoneAudio.pause();
             if (ringtoneAudio) ringtoneAudio.pause();
+            if ('vibrate' in navigator) navigator.vibrate(0);
+            
+            releaseWakeLock(); // Screen lock release karein
             clearInterval(activeCallTimerInterval);
 
             if (localMediaStream) {
