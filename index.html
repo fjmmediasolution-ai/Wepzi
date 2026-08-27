@@ -2363,8 +2363,15 @@ function endCallUI() {
         }
 
 
-// Smart Permission Request Function
+// Smart & Robust Permission Request Function
 async function getMediaStreamWithPermission(isVideo = false) {
+    // Check karein ke browser media devices support karta hai ya nahi
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("⚠️ Aapka browser audio calling support nahi karta ya page HTTPS par nahi hai!");
+        return null;
+    }
+
+    // Pehle advanced constraints try karein
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -2375,17 +2382,30 @@ async function getMediaStreamWithPermission(isVideo = false) {
             video: isVideo
         });
         return stream;
-    } catch (error) {
-        console.error("Microphone Error:", error);
+    } catch (advancedError) {
+        console.warn("Advanced audio failed, trying basic audio...", advancedError);
         
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            alert("⚠️ Microphone Permission Blocked!\n\nHal: Mobile Settings > Apps > Wepzi > Permissions > Microphone ko 'Allow' karein.");
-        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            alert("⚠️ Microphone nahi mila! Kripya apna mic check karein.");
-        } else {
-            alert("⚠️ Audio Access Error: " + error.message);
+        // Fallback: Agar advanced fail ho jaye to simple audio try karein
+        try {
+            const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: isVideo
+            });
+            return fallbackStream;
+        } catch (error) {
+            console.error("Microphone Error Details:", error);
+            
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                alert("⚠️ Microphone Permission Blocked!\n\nHal: Browser ke URL bar par lock (🔒) icon dabayein aur Permissions mein jakar Microphone ko 'Allow' karein.");
+            } else if (error.name === 'NotReadableError' || error.message.includes('start audio source')) {
+                alert("⚠️ Microphone Busy Hai!\n\nHal: Kisi doosri app (WhatsApp, Call Recorder, Screen Recorder) ko band karein aur mobile restart karein.");
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                alert("⚠️ Mobile ka microphone nahi mila!");
+            } else {
+                alert("⚠️ Audio Access Error: " + error.message);
+            }
+            return null;
         }
-        return null;
     }
 }
 
