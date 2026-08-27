@@ -535,9 +535,9 @@
         </div>
 
         <!-- Audio Elements for Ringing, Dialtone & Remote Voice -->
-        <audio id="ringtoneAudio" loop src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-        <audio id="dialtoneAudio" loop src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
-        <audio id="remoteAudioStream" autoplay></audio>
+        <audio id="ringtoneAudio" loop preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+        <audio id="dialtoneAudio" loop preload="auto" src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
+        <audio id="remoteAudioStream" autoplay playsinline></audio>
 
         <div class="screens-wrapper show-screen-1" id="screensWrapper">
             
@@ -785,7 +785,7 @@
 
                 <!-- 1. CHATS TAB VIEW -->
                 <div id="tabChatsView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                    <!-- Status Stories (Clean User Profile Only) -->
+                    <!-- Status Stories -->
                     <div class="status-container">
                         <div class="status-card" onclick="switchTab('status')">
                             <div class="status-avatar-wrapper">
@@ -855,80 +855,78 @@
                         </div>
 
                         <!-- Webpay Wallet Card -->
-                <div class="webpay-card">
-                    <div class="webpay-card-header">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
-                            <span style="color: #ffffff; font-weight: 800; font-size: 15px;">Webpay Account</span>
+                        <div class="webpay-card">
+                            <div class="webpay-card-header">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
+                                    <span style="color: #ffffff; font-weight: 800; font-size: 15px;">Webpay Account</span>
+                                </div>
+                                <span class="webpay-badge-active">ACTIVE</span>
+                            </div>
+                            
+                            <div class="webpay-data-row">
+                                <span class="webpay-data-label">Registered Mobile:</span>
+                                <span class="webpay-data-val" id="webpayLinkedNumber">+92 300 0000000</span>
+                            </div>
+                            <div class="webpay-data-row">
+                                <span class="webpay-data-label">Webpay Account ID:</span>
+                                <span class="webpay-data-val" style="color: #c084fc;" id="webpayAccountId">WP-3000000000</span>
+                            </div>
+                            <div class="webpay-data-row">
+                                <span class="webpay-data-label">Wallet Balance:</span>
+                                <span class="webpay-data-val" style="color: #10b981;" id="webpayBalance">Rs. 0.00 PKR</span>
+                            </div>
+
+                            <div class="webpay-actions">
+                                <div class="webpay-btn" onclick="openWebpayActionModal('topup')"><i class="fa-solid fa-plus-circle"></i> Top Up</div>
+                                <div class="webpay-btn" onclick="openWebpayActionModal('send')"><i class="fa-solid fa-paper-plane"></i> Send Money</div>
+                            </div>
                         </div>
-                        <span class="webpay-badge-active">ACTIVE</span>
-                    </div>
-                    
-                    <div class="webpay-data-row">
-                        <span class="webpay-data-label">Registered Mobile:</span>
-                        <span class="webpay-data-val" id="webpayLinkedNumber">+92 300 0000000</span>
-                    </div>
-                    <div class="webpay-data-row">
-                        <span class="webpay-data-label">Webpay Account ID:</span>
-                        <span class="webpay-data-val" style="color: #c084fc;" id="webpayAccountId">WP-3000000000</span>
-                    </div>
-                    <div class="webpay-data-row">
-                        <span class="webpay-data-label">Wallet Balance:</span>
-                        <span class="webpay-data-val" style="color: #10b981;" id="webpayBalance">Rs. 0.00 PKR</span>
-                    </div>
 
-                    <div class="webpay-actions">
-                        <div class="webpay-btn" onclick="openWebpayActionModal('topup')"><i class="fa-solid fa-plus-circle"></i> Top Up</div>
-                        <div class="webpay-btn" onclick="openWebpayActionModal('send')"><i class="fa-solid fa-paper-plane"></i> Send Money</div>
-                    </div>
-                </div>
-
-                <!-- ================= PART 3 KA HTML YAHAN PASTE HOGA ================= -->
-                <!-- Microphone Test Item -->
-                <div class="settings-item" onclick="testMicrophone()">
-                    <div class="settings-left">
-                        <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-microphone"></i></div>
-                        <div class="settings-info">
-                            <h4>Test Microphone</h4>
-                            <p id="micStatusText">Tap to check mic permissions</p>
+                        <!-- Microphone Test Item -->
+                        <div class="settings-item" onclick="testMicrophone()">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-microphone"></i></div>
+                                <div class="settings-info">
+                                    <h4>Test Microphone</h4>
+                                    <p id="micStatusText">Tap to check mic permissions</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
                         </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                </div>
 
-                <!-- Call Ringtone Toggle Item -->
-                <div class="settings-item" onclick="toggleSetting('ringtone')">
-                    <div class="settings-left">
-                        <div class="settings-icon-box" style="background: #8b5cf6;"><i class="fa-solid fa-bell"></i></div>
-                        <div class="settings-info">
-                            <h4>Call Ringtone</h4>
-                            <p id="ringtoneStatusText">Enabled</p>
+                        <!-- Call Ringtone Toggle Item -->
+                        <div class="settings-item" onclick="toggleSetting('ringtone')">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #8b5cf6;"><i class="fa-solid fa-bell"></i></div>
+                                <div class="settings-info">
+                                    <h4>Call Ringtone</h4>
+                                    <p id="ringtoneStatusText">Enabled</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-toggle-on" id="ringtoneToggleIcon" style="color: #10b981; font-size: 22px;"></i>
                         </div>
-                    </div>
-                    <i class="fa-solid fa-toggle-on" id="ringtoneToggleIcon" style="color: #10b981; font-size: 22px;"></i>
-                </div>
 
-                <!-- Vibrate Toggle Item -->
-                <div class="settings-item" onclick="toggleSetting('vibrate')">
-                    <div class="settings-left">
-                        <div class="settings-icon-box" style="background: #f59e0b;"><i class="fa-solid fa-mobile-screen-button"></i></div>
-                        <div class="settings-info">
-                            <h4>Vibrate on Call</h4>
-                            <p id="vibrateStatusText">Enabled</p>
+                        <!-- Vibrate Toggle Item -->
+                        <div class="settings-item" onclick="toggleSetting('vibrate')">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #f59e0b;"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                                <div class="settings-info">
+                                    <h4>Vibrate on Call</h4>
+                                    <p id="vibrateStatusText">Enabled</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-toggle-on" id="vibrateToggleIcon" style="color: #10b981; font-size: 22px;"></i>
                         </div>
-                    </div>
-                    <i class="fa-solid fa-toggle-on" id="vibrateToggleIcon" style="color: #10b981; font-size: 22px;"></i>
-                </div>
-                <!-- ================================================================== -->
 
-                <!-- Uske baad Account Settings shuru hogi -->
-                <div class="settings-item" onclick="alert('Account & Security settings')">
-                    <div class="settings-left">
-                        <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
-                        <div class="settings-info"><h4>Account</h4><p>Security notifications, two-step verification</p></div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                </div>
+                        <!-- Account Settings -->
+                        <div class="settings-item" onclick="alert('Account & Security settings')">
+                            <div class="settings-left">
+                                <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
+                                <div class="settings-info"><h4>Account</h4><p>Security notifications, two-step verification</p></div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
+                        </div>
 
                     </div>
                 </div>
@@ -1735,7 +1733,8 @@
             closeWebpayActionModal();
         }
 
-       function listenForIncomingCalls() {
+        // ================= ROBUST CALLING & AUDIO ENGINE =================
+        function listenForIncomingCalls() {
             const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
             if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
 
@@ -1774,7 +1773,8 @@
                     console.error("Call listener error:", error);
                 });
         }
-       async function startCall(type) {
+
+        async function startCall(type) {
             const rawPartner = currentChatPartnerPhone;
             const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
 
@@ -1788,9 +1788,9 @@
                 return;
             }
 
-            // 1. Smart Permission Check
+            // 1. Smart Permission Request
             localMediaStream = await getMediaStreamWithPermission(type === 'video');
-            if (!localMediaStream) return; // Agar permission nahi mili toh call yahin ruk jayegi
+            if (!localMediaStream) return;
 
             // Caller UI Setup
             document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
@@ -1812,7 +1812,10 @@
                 });
 
                 peerConnection.ontrack = (event) => {
-                    if (remoteAudioStream) remoteAudioStream.srcObject = event.streams[0];
+                    if (remoteAudioStream) {
+                        remoteAudioStream.srcObject = event.streams[0];
+                        remoteAudioStream.play().catch(() => {});
+                    }
                 };
 
                 const db = firebase.firestore();
@@ -1853,7 +1856,7 @@
                         const answerDescription = new RTCSessionDescription(data.answer);
                         await peerConnection.setRemoteDescription(answerDescription);
 
-                        requestWakeLock(); // Screen on rakhein
+                        requestWakeLock();
                         startCallDurationTimer();
                     }
 
@@ -1921,7 +1924,10 @@
                 });
 
                 peerConnection.ontrack = (event) => {
-                    if (remoteAudioStream) remoteAudioStream.srcObject = event.streams[0];
+                    if (remoteAudioStream) {
+                        remoteAudioStream.srcObject = event.streams[0];
+                        remoteAudioStream.play().catch(() => {});
+                    }
                 };
 
                 const offerCandidates = callDoc.collection("offerCandidates");
@@ -1952,7 +1958,7 @@
                     });
                 });
 
-                requestWakeLock(); // Screen on rakhein
+                requestWakeLock();
                 startCallDurationTimer();
 
                 unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
@@ -2004,12 +2010,12 @@
             endCallUI();
         }
 
-function endCallUI() {
+        function endCallUI() {
             if (dialtoneAudio) dialtoneAudio.pause();
             if (ringtoneAudio) ringtoneAudio.pause();
             if ('vibrate' in navigator) navigator.vibrate(0);
             
-            releaseWakeLock(); // Screen lock release karein
+            releaseWakeLock();
             clearInterval(activeCallTimerInterval);
 
             if (localMediaStream) {
@@ -2182,26 +2188,6 @@ function endCallUI() {
             }
         }
 
-        async function deleteAccountPermanently() {
-            const confirmDelete = confirm("⚠️ KYA AAP WAQAI APNA ACCOUNT DELETE KARNA CHAHTE HAIN?\n\nAapka profile, saved contacts aur tamam chats hamesha ke liye delete ho jayengi.");
-            if (!confirmDelete) return;
-
-            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-            if (!myPhone) return;
-
-            const db = firebase.firestore();
-
-            try {
-                await db.collection("users").doc(myPhone).delete();
-                localStorage.removeItem('wepzi_user_session');
-                localStorage.removeItem('wepzi_logged_in_phone');
-                alert("Aapka Wepzi account kamyabi se delete ho gaya hai.");
-                location.reload();
-            } catch (err) {
-                alert("Account delete karne mein masla pesh aya: " + err.message);
-            }
-        }
-
         // ================= AUTO-LOGIN PERSISTENCE =================
         window.addEventListener('DOMContentLoaded', async () => {
             const savedSession = localStorage.getItem('wepzi_user_session');
@@ -2362,118 +2348,118 @@ function endCallUI() {
                 .catch(err => console.log("Delivered sync note:", err.message));
         }
 
-
-// Smart & Robust Permission Request Function
-async function getMediaStreamWithPermission(isVideo = false) {
-    // Check karein ke browser media devices support karta hai ya nahi
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("⚠️ Aapka browser audio calling support nahi karta ya page HTTPS par nahi hai!");
-        return null;
-    }
-
-    // Pehle advanced constraints try karein
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-            },
-            video: isVideo
-        });
-        return stream;
-    } catch (advancedError) {
-        console.warn("Advanced audio failed, trying basic audio...", advancedError);
-        
-        // Fallback: Agar advanced fail ho jaye to simple audio try karein
-        try {
-            const fallbackStream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: isVideo
-            });
-            return fallbackStream;
-        } catch (error) {
-            console.error("Microphone Error Details:", error);
-            
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                alert("⚠️ Microphone Permission Blocked!\n\nHal: Browser ke URL bar par lock (🔒) icon dabayein aur Permissions mein jakar Microphone ko 'Allow' karein.");
-            } else if (error.name === 'NotReadableError' || error.message.includes('start audio source')) {
-                alert("⚠️ Microphone Busy Hai!\n\nHal: Kisi doosri app (WhatsApp, Call Recorder, Screen Recorder) ko band karein aur mobile restart karein.");
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                alert("⚠️ Mobile ka microphone nahi mila!");
-            } else {
-                alert("⚠️ Audio Access Error: " + error.message);
+        // ================= SMART PERMISSION REQUEST & FALLBACK =================
+        async function getMediaStreamWithPermission(isVideo = false) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("⚠️ Aapka browser media access support nahi karta ya page HTTPS par nahi hai!");
+                return null;
             }
-            return null;
+
+            // 1. Try with clear constraints
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    },
+                    video: isVideo
+                });
+                return stream;
+            } catch (err) {
+                console.warn("Advanced audio constraints failed, trying basic audio...", err);
+                
+                // 2. Fallback to basic audio
+                try {
+                    const fallbackStream = await navigator.mediaDevices.getUserMedia({
+                        audio: true,
+                        video: isVideo
+                    });
+                    return fallbackStream;
+                } catch (error) {
+                    console.error("Microphone Error:", error);
+                    
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        alert("⚠️ Microphone Permission Blocked!\n\nHal: Browser URL bar mein bane Lock (🔒) icon par tap karein aur Microphone ko 'Allow' karein.");
+                    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError' || (error.message && error.message.includes('start audio source'))) {
+                        alert("⚠️ Microphone Busy Hai!\n\nHal: Koi doosri app (WhatsApp, Call Recorder, Screen Recorder) mic use kar rahi hai. Saari apps band karein aur phone restart karein.");
+                    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                        alert("⚠️ Mobile ka Microphone nahi mila!");
+                    } else {
+                        alert("⚠️ Audio Access Error: " + error.message);
+                    }
+                    return null;
+                }
+            }
         }
-    }
-}
 
-let wakeLock = null;
+        let wakeLock = null;
 
-async function requestWakeLock() {
-    try {
-        if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Screen WakeLock active');
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('Screen WakeLock active');
+                }
+            } catch (err) {
+                console.log('WakeLock error:', err);
+            }
         }
-    } catch (err) {
-        console.log('WakeLock error:', err);
-    }
-}
 
-function releaseWakeLock() {
-    if (wakeLock !== null) {
-        wakeLock.release();
-        wakeLock = null;
-    }
-}
-// Settings Logic
-let appSettings = JSON.parse(localStorage.getItem('wepzi_settings')) || {
-    ringtone: true,
-    vibrate: true
-};
+        function releaseWakeLock() {
+            if (wakeLock !== null) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
 
-async function testMicrophone() {
-    const statusText = document.getElementById('micStatusText');
-    statusText.innerText = "Testing mic...";
-    
-    const stream = await getMediaStreamWithPermission(false);
-    if (stream) {
-        statusText.innerText = "✅ Microphone Working & Allowed";
-        statusText.style.color = "#10b981";
-        stream.getTracks().forEach(t => t.stop()); // Stop test stream
-        alert("✅ Microphone bilkul theek kaam kar raha hai!");
-    } else {
-        statusText.innerText = "❌ Permission Denied / Error";
-        statusText.style.color = "#ef4444";
-    }
-}
+        // ================= SETTINGS LOGIC =================
+        let appSettings = JSON.parse(localStorage.getItem('wepzi_settings')) || {
+            ringtone: true,
+            vibrate: true
+        };
 
-function toggleSetting(key) {
-    appSettings[key] = !appSettings[key];
-    localStorage.setItem('wepzi_settings', JSON.stringify(appSettings));
-    updateSettingsUI();
-}
+        async function testMicrophone() {
+            const statusText = document.getElementById('micStatusText');
+            statusText.innerText = "Testing mic...";
+            statusText.style.color = "var(--text-muted)";
+            
+            const stream = await getMediaStreamWithPermission(false);
+            if (stream) {
+                statusText.innerText = "✅ Microphone Working & Allowed";
+                statusText.style.color = "#10b981";
+                // Properly release hardware stream immediately
+                stream.getTracks().forEach(t => t.stop());
+                alert("✅ Microphone bilkul theek kaam kar raha hai!");
+            } else {
+                statusText.innerText = "❌ Permission Denied / Error";
+                statusText.style.color = "#ef4444";
+            }
+        }
 
-function updateSettingsUI() {
-    const rIcon = document.getElementById('ringtoneToggleIcon');
-    const rText = document.getElementById('ringtoneStatusText');
-    if (rIcon && rText) {
-        rIcon.className = appSettings.ringtone ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
-        rIcon.style.color = appSettings.ringtone ? "#10b981" : "var(--text-muted)";
-        rText.innerText = appSettings.ringtone ? "Enabled" : "Disabled";
-    }
+        function toggleSetting(key) {
+            appSettings[key] = !appSettings[key];
+            localStorage.setItem('wepzi_settings', JSON.stringify(appSettings));
+            updateSettingsUI();
+        }
 
-    const vIcon = document.getElementById('vibrateToggleIcon');
-    const vText = document.getElementById('vibrateStatusText');
-    if (vIcon && vText) {
-        vIcon.className = appSettings.vibrate ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
-        vIcon.style.color = appSettings.vibrate ? "#10b981" : "var(--text-muted)";
-        vText.innerText = appSettings.vibrate ? "Enabled" : "Disabled";
-    }
-}
+        function updateSettingsUI() {
+            const rIcon = document.getElementById('ringtoneToggleIcon');
+            const rText = document.getElementById('ringtoneStatusText');
+            if (rIcon && rText) {
+                rIcon.className = appSettings.ringtone ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
+                rIcon.style.color = appSettings.ringtone ? "#10b981" : "var(--text-muted)";
+                rText.innerText = appSettings.ringtone ? "Enabled" : "Disabled";
+            }
 
+            const vIcon = document.getElementById('vibrateToggleIcon');
+            const vText = document.getElementById('vibrateStatusText');
+            if (vIcon && vText) {
+                vIcon.className = appSettings.vibrate ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
+                vIcon.style.color = appSettings.vibrate ? "#10b981" : "var(--text-muted)";
+                vText.innerText = appSettings.vibrate ? "Enabled" : "Disabled";
+            }
+        }
     </script>
 </body>
 </html>
