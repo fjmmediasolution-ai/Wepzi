@@ -1,2465 +1,1548 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wepzi - Connect. Secure. Yours.</title>
-    <!-- FontAwesome 6 for High-Quality Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Firebase SDKs (Compat version) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wepzi - Connect Beyond Limits</title>
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
 
-        :root {
-            --bg-dark: #0b0c16;
-            --box-bg: #151623;
-            --box-hover: #1c1e30;
-            --box-border: #222538;
-            --text-main: #ffffff;
-            --text-muted: #8a8d9e;
-            --link-color: #7240f5;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #ec4899;
-            --accent-emerald: #10b981;
-            --gradient-text: linear-gradient(90deg, #a855f7, #c084fc);
-            --gradient-btn: linear-gradient(90deg, #6221ea 0%, #d83086 50%, #f46f5a 100%);
-            --gradient-ring: linear-gradient(135deg, #8636f3, #e53995);
-            --gradient-webpay: linear-gradient(135deg, #1e1b4b 0%, #31104b 50%, #1e1035 100%);
-            --gradient-msg-me: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-        }
+    body {
+      background-color: #010208;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+    /* Screen Frame */
+    .app-screen {
+      position: relative;
+      width: 100%;
+      max-width: 412px;
+      height: 100vh;
+      max-height: 890px;
+      background: #030412;
+      padding: 60px 24px 36px 24px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+    }
 
-        body {
-            background-color: #030408;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow: hidden;
-        }
+    /* Screen Containers to toggle views */
+    .screen-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      width: 100%;
+      animation: fadeScale 0.4s ease-out forwards;
+    }
 
-        .app-container {
-            width: 100%;
-            max-width: 415px;
-            height: 100vh;
-            height: 100dvh;
-            background-color: var(--bg-dark);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+    @keyframes fadeScale {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
 
-        @media (min-width: 480px) {
-            .app-container {
-                max-height: 840px;
-                border-radius: 36px;
-                border: 1px solid #1f2238;
-                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(114, 64, 245, 0.2);
-            }
-        }
+    /* Canvas for animated drifting particles & stars */
+    #particleCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-        /* 6-Screen Slider */
-        .screens-wrapper {
-            display: flex;
-            width: 600%;
-            height: 100%;
-            transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    /* Animated Ambient Glow in Background */
+    .ambient-glow {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(70px);
+      opacity: 0.45;
+      animation: ambientPulse 8s infinite alternate ease-in-out;
+    }
 
-        .screen {
-            width: 16.6666%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: clamp(18px, 3.5vh, 35px) 24px clamp(16px, 2.5vh, 26px) 24px;
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
-        .screen::-webkit-scrollbar { display: none; }
+    .ambient-glow.blue {
+      top: 30%;
+      left: -20%;
+      background: radial-gradient(circle, #00d2ff, transparent 70%);
+      animation-duration: 9s;
+    }
 
-        .show-screen-1 { transform: translateX(0%); }
-        .show-screen-2 { transform: translateX(-16.6666%); }
-        .show-screen-3 { transform: translateX(-33.3333%); }
-        .show-screen-4 { transform: translateX(-50%); }
-        .show-screen-5 { transform: translateX(-66.6666%); }
-        .show-screen-6 { transform: translateX(-83.3333%); }
+    .ambient-glow.purple {
+      top: 45%;
+      right: -25%;
+      background: radial-gradient(circle, #9333ea, transparent 70%);
+      animation-duration: 11s;
+    }
 
-        .top-nav { display: flex; align-items: center; margin-bottom: clamp(10px, 2vh, 18px); }
-        .back-btn { color: var(--text-main); font-size: 18px; cursor: pointer; padding: 6px 14px 6px 0; transition: transform 0.15s; }
-        .back-btn:active { transform: scale(0.9); }
-        
-        .btn-gradient {
-            background: var(--gradient-btn);
-            color: var(--text-main);
-            border: none;
-            padding: clamp(14px, 2.2vh, 17px);
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 700;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(216, 48, 134, 0.35);
-            width: 100%;
-            transition: transform 0.15s, opacity 0.2s;
-        }
-        .btn-gradient:active { transform: scale(0.98); }
-        .btn-gradient:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-gradient i { position: absolute; right: 20px; font-size: 16px; }
+    @keyframes ambientPulse {
+      0% { transform: scale(0.9) translate(0, 0); opacity: 0.35; }
+      50% { transform: scale(1.15) translate(15px, -10px); opacity: 0.55; }
+      100% { transform: scale(1) translate(-10px, 15px); opacity: 0.4; }
+    }
 
-        .heading-group h2 { color: var(--text-main); font-size: clamp(23px, 3.5vh, 28px); font-weight: 800; line-height: 1.25; }
-        .heading-group h2 span.purple-text { color: #a855f7; }
-        .heading-group h2 span.gradient-text { 
-            background: var(--gradient-text); 
-            -webkit-background-clip: text; 
-            background-clip: text;
-            -webkit-text-fill-color: transparent; 
-            display: block; 
-        }
-        .heading-group p { color: var(--text-muted); font-size: 13.5px; margin-top: 6px; line-height: 1.45; }
-        .security-badge { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); font-size: 11.5px; margin-top: 10px; }
+    /* Glowing Wave Container */
+    .wave-wrapper {
+      position: absolute;
+      top: 15%;
+      left: -25%;
+      width: 150%;
+      height: 70%;
+      pointer-events: none;
+      z-index: 1;
+    }
 
-        /* Screen 1 */
-        .welcome-top { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; flex: 1; }
-        .logo-container { width: clamp(85px, 13vh, 115px); height: clamp(85px, 13vh, 115px); margin-bottom: 16px; filter: drop-shadow(0 10px 20px rgba(168, 85, 247, 0.3)); }
-        .logo-container svg { width: 100%; height: 100%; }
-        .app-title { color: var(--text-main); font-size: clamp(26px, 4vh, 34px); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .app-subtitle { color: #c084fc; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-        .app-description { color: var(--text-muted); font-size: 13px; }
-        .language-selector { background-color: var(--box-bg); padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 12px; border: 1px solid var(--box-border); }
-        .lang-left { display: flex; align-items: center; gap: 10px; color: var(--text-main); font-size: 14px; font-weight: 600; }
-        .lang-left i { color: #10b981; font-size: 17px; }
-        .footer-terms { text-align: center; color: var(--text-muted); font-size: 11.5px; margin-top: 8px; line-height: 1.4; }
-        .footer-terms a { color: var(--accent-purple); text-decoration: none; font-weight: 600; }
+    .wave-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
 
-        /* Screen 2 */
-        .phone-content { flex: 1; display: flex; flex-direction: column; gap: 18px; }
-        .country-box { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--box-border); }
-        .country-left { display: flex; align-items: center; gap: 12px; color: var(--text-main); font-size: 15px; font-weight: 600; }
-        .phone-input-box { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--box-border); }
-        .phone-input-box i { color: var(--text-muted); font-size: 16px; }
-        .phone-input-box input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 16px; font-weight: 600; width: 100%; letter-spacing: 1px; }
+    /* Wave Layer Animations */
+    .wave-layer-1 {
+      animation: waveDrift1 8s infinite ease-in-out;
+      transform-origin: center;
+    }
 
-        /* Screen 3 */
-        .otp-content { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-        .highlight-phone { color: var(--text-main); font-weight: 700; display: block; margin-top: 4px; font-size: 15px; }
-        .otp-boxes-container { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; }
-        .otp-input { width: clamp(42px, 12vw, 48px); height: clamp(50px, 6.5vh, 60px); background-color: var(--box-bg); border: 1.5px solid var(--box-border); border-radius: 14px; color: var(--text-main); font-size: 22px; font-weight: 800; text-align: center; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-        .otp-input:focus { border-color: #a855f7; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); }
-        .resend-box { text-align: center; font-size: 13.5px; color: var(--text-muted); margin-top: 10px; }
-        .resend-box span.timer { color: #a855f7; font-weight: 700; }
-        .resend-btn-active { color: #ff7f50 !important; font-weight: 700; cursor: pointer; text-decoration: underline; }
-        .expired-error { color: #ef4444; font-size: 12px; text-align: center; margin-top: 6px; display: none; }
+    .wave-layer-2 {
+      animation: waveDrift2 10s infinite ease-in-out;
+      transform-origin: center;
+    }
 
-        /* Screen 4 */
-        .profile-content { flex: 1; display: flex; flex-direction: column; gap: 16px; }
-        .avatar-wrapper { display: flex; justify-content: center; position: relative; margin: 8px 0; }
-        .avatar-box { position: relative; width: 105px; height: 105px; cursor: pointer; }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #282a42; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-        .camera-badge { position: absolute; bottom: 2px; right: 2px; width: 34px; height: 34px; background: #7c3aed; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; border: 3px solid var(--bg-dark); font-size: 13px; }
-        .profile-inputs { display: flex; flex-direction: column; gap: 12px; }
-        .input-row { background-color: var(--box-bg); padding: 16px 18px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--box-border); }
-        .input-left-label { display: flex; align-items: center; gap: 12px; color: var(--text-muted); font-size: 14px; font-weight: 500; }
-        .name-field-input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 15px; font-weight: 700; text-align: right; width: 160px; }
-        .wepzi-id-box { background-color: var(--box-bg); padding: 14px 18px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--box-border); }
-        .id-details { display: flex; flex-direction: column; gap: 3px; }
-        .id-title-row { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 13px; }
-        .id-generated-val { color: var(--text-main); font-size: 14px; font-weight: 700; padding-left: 24px; }
-        .verified-check { color: #22c55e; font-size: 18px; }
+    .wave-smoke {
+      animation: smokeBreathe 9s infinite alternate ease-in-out;
+      transform-origin: center;
+    }
 
-        /* Screen 5 */
-        .permissions-content { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-        .permissions-list { display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
-        .permission-card { background-color: var(--box-bg); padding: 12px 14px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid var(--box-border); transition: background 0.2s; }
-        .permission-card:active { background: var(--box-hover); }
-        .perm-left { display: flex; align-items: center; gap: 12px; }
-        .perm-icon-box { width: 38px; height: 38px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 16px; }
-        .icon-contacts { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-        .icon-notif { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-        .icon-mic { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-        .icon-camera { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
-        .icon-storage { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
-        .perm-info h4 { color: var(--text-main); font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-        .perm-info p { color: var(--text-muted); font-size: 11px; }
-        .perm-check-badge { width: 22px; height: 22px; border-radius: 50%; background: #7c3aed; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 11px; }
-        .perm-check-badge.unchecked { background: transparent; border: 2px solid var(--box-border); color: transparent; }
+    @keyframes waveDrift1 {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scaleY(1); }
+      50% { transform: translateY(-12px) rotate(-1.2deg) scaleY(1.05); }
+    }
 
-        /* Screen 6 - Home */
-        .screen-home { padding: 0 !important; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden; }
-        .home-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .home-header-left { display: flex; align-items: center; gap: 16px; }
-        .home-header-left i { color: var(--text-main); font-size: 18px; cursor: pointer; }
-        .home-logo { 
-            background: linear-gradient(135deg, #a855f7, #6366f1); 
-            -webkit-background-clip: text; 
-            background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            font-size: 22px; 
-            font-weight: 800; 
-            cursor: pointer;
-            letter-spacing: -0.5px;
-        }
-        .home-header-right { display: flex; align-items: center; gap: 14px; position: relative; }
-        .home-header-right i { color: var(--text-main); font-size: 18px; cursor: pointer; }
-        .add-chat-btn { background: #8b5cf6; border: none; width: 34px; height: 34px; border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 15px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4); }
+    @keyframes waveDrift2 {
+      0%, 100% { transform: translateY(0px) rotate(0deg) scaleX(1); opacity: 0.85; }
+      50% { transform: translateY(14px) rotate(1.5deg) scaleX(1.03); opacity: 1; }
+    }
 
-        /* Sidebar Navigation Drawer */
-        .sidebar-drawer {
-            position: absolute;
-            top: 0;
-            left: -290px;
-            width: 290px;
-            height: 100%;
-            background: #121320;
-            border-right: 1px solid var(--box-border);
-            z-index: 2000;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 30px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .sidebar-drawer.open { left: 0; }
-        .sidebar-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(3px);
-            z-index: 1999;
-            display: none;
-        }
-        .sidebar-overlay.show { display: block; }
-        .drawer-header { display: flex; align-items: center; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid var(--box-border); cursor: pointer; }
-        .drawer-avatar { width: 52px; height: 52px; border-radius: 50%; border: 2.5px solid var(--accent-purple); object-fit: cover; }
-        .drawer-user-info h4 { color: var(--text-main); font-size: 16px; font-weight: 700; }
-        .drawer-user-info p { color: var(--text-muted); font-size: 12px; }
-        .drawer-menu-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .drawer-item { display: flex; align-items: center; gap: 16px; padding: 12px 14px; color: var(--text-main); border-radius: 14px; cursor: pointer; transition: background 0.2s; font-size: 14px; font-weight: 600; }
-        .drawer-item:hover, .drawer-item:active { background: rgba(255,255,255,0.06); }
-        .drawer-item i { color: var(--text-muted); font-size: 16px; width: 20px; text-align: center; }
+    @keyframes smokeBreathe {
+      0% { opacity: 0.3; transform: scale(0.98); }
+      100% { opacity: 0.55; transform: scale(1.04); }
+    }
 
-        /* Dropdown Options Menu */
-        .plus-dropdown {
-            position: absolute;
-            top: 48px;
-            right: 0;
-            background: #1c1d2e;
-            border: 1px solid var(--box-border);
-            border-radius: 18px;
-            padding: 8px;
-            width: 190px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            z-index: 1001;
-        }
-        .plus-dropdown.show { display: flex; }
-        .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; color: var(--text-main); font-size: 13.5px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
-        .dropdown-item:hover { background: rgba(255,255,255,0.07); }
-        .dropdown-item i { width: 16px; text-align: center; color: var(--accent-purple); }
+    /* Branding Section */
+    .header-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 45px; 
+    }
 
-        /* Search Bar */
-        .search-container { padding: 0 20px; margin: 8px 0; display: none; }
-        .search-box { background: var(--box-bg); border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--box-border); }
-        .search-box i { color: var(--text-muted); font-size: 14px; }
-        .search-box input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 13.5px; width: 100%; }
+    .logo-container {
+      width: 118px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px; 
+      margin-bottom: 14px;
+      filter: drop-shadow(0 12px 28px rgba(110, 48, 240, 0.45));
+      animation: logoGlowPulse 4s infinite alternate ease-in-out;
+    }
 
-        /* Status Stories */
-        .status-container { display: flex; gap: 16px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .status-container::-webkit-scrollbar { display: none; }
-        .status-card { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; }
-        .status-avatar-wrapper { position: relative; width: 58px; height: 58px; border-radius: 50%; padding: 2.5px; background: var(--gradient-ring); }
-        .status-avatar-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-dark); }
-        .status-add-icon { position: absolute; bottom: 0; right: 0; background: #8b5cf6; width: 19px; height: 19px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid var(--bg-dark); color: white; font-size: 9px; }
-        .status-label { color: var(--text-main); font-size: 11.5px; font-weight: 600; }
+    @keyframes logoGlowPulse {
+      0% { transform: translateY(0px); filter: drop-shadow(0 10px 22px rgba(110, 48, 240, 0.4)); }
+      100% { transform: translateY(-4px); filter: drop-shadow(0 16px 32px rgba(147, 51, 234, 0.65)); }
+    }
 
-        /* Filter Chips */
-        .filter-bar { display: flex; align-items: center; gap: 8px; padding: 10px 20px; overflow-x: auto; scrollbar-width: none; }
-        .filter-bar::-webkit-scrollbar { display: none; }
-        .chip { background-color: var(--box-bg); color: var(--text-muted); border: 1px solid var(--box-border); padding: 6px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .chip.active { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
+    .logo-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
 
-        /* Chat Body & Rows */
-        .chat-body-container { flex: 1; overflow-y: auto; padding: 10px 20px; scrollbar-width: none; }
-        .chat-body-container::-webkit-scrollbar { display: none; }
-        .empty-chat-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-muted); padding: 20px; }
-        .empty-icon-circle { width: 75px; height: 75px; border-radius: 50%; background: #151623; display: flex; justify-content: center; align-items: center; font-size: 30px; color: #8b5cf6; margin-bottom: 15px; border: 1px dashed rgba(139, 92, 246, 0.4); }
-        .empty-chat-state h3 { color: var(--text-main); font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-        .empty-chat-state p { font-size: 12.5px; line-height: 1.5; max-width: 250px; }
+    .brand-title {
+      font-size: 42px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.6px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
 
-        .chat-row-item { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: background 0.15s; }
-        .chat-row-item:active { background: rgba(255,255,255,0.02); }
-        .chat-row-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
-        .chat-row-details { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
-        .chat-row-header { display: flex; justify-content: space-between; align-items: center; }
-        .chat-row-name { color: var(--text-main); font-size: 15px; font-weight: 700; }
-        .chat-row-time { color: var(--text-muted); font-size: 11px; }
-        .chat-row-msg { color: var(--text-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-tagline {
+      font-size: 15.5px;
+      font-weight: 400;
+      color: #9ea2c4;
+      letter-spacing: 0.1px;
+      text-align: center;
+    }
 
-        /* Full Screen Chat Viewport */
-        .chat-window {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .chat-window.open { left: 0; }
-        .chat-win-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--box-border); background: var(--box-bg); }
-        .chat-win-left { display: flex; align-items: center; gap: 12px; }
-        .chat-win-info h4 { color: var(--text-main); font-size: 15px; font-weight: 700; }
-        .chat-win-info p { font-size: 11px; font-weight: 600; }
-        .chat-win-right { display: flex; align-items: center; gap: 18px; color: var(--text-main); }
-        .chat-win-right i { cursor: pointer; font-size: 17px; }
+    /* Features 4-Icons Row */
+    .features-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 4px;
+      margin-top: auto;
+      margin-bottom: 42px;
+    }
 
-        .chat-win-messages { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; background-image: radial-gradient(rgba(114, 64, 245, 0.04) 1px, transparent 0); background-size: 16px 16px; scrollbar-width: none; }
-        .chat-win-messages::-webkit-scrollbar { display: none; }
-        .msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 18px; font-size: 13.5px; line-height: 1.45; position: relative; word-wrap: break-word; }
-        .msg-received { background: var(--box-bg); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.03); }
-        .msg-sent { background: var(--gradient-msg-me); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25); }
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
 
-        /* Online & Typing Styles */
-        .status-online-text {
-            color: #10b981 !important;
-            font-weight: 600;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .status-online-text::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background-color: #10b981;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-offline-text { color: var(--text-muted) !important; font-size: 11px; font-weight: 500; }
-        .status-typing-text { color: #c084fc !important; font-weight: 700; font-size: 11.5px; letter-spacing: 0.3px; }
+    .feature-item:active {
+      transform: scale(0.92);
+    }
 
-        /* Message Ticks */
-        .msg-meta { font-size: 9.5px; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 4px; }
-        .tick-icon { font-size: 11px; line-height: 1; }
-        .tick-sent, .tick-delivered { color: rgba(255, 255, 255, 0.6); }
-        .tick-read { color: #38bdf8 !important; }
+    .icon-circle {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: rgba(14, 16, 42, 0.45);
+      border: 1.2px solid rgba(133, 137, 212, 0.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      transition: all 0.3s ease;
+    }
 
-        /* Attachments Panel */
-        .attachments-panel {
-            position: absolute;
-            bottom: 75px;
-            left: 16px;
-            background: #1c1d2e;
-            border: 1px solid var(--box-border);
-            border-radius: 22px;
-            padding: 16px;
-            display: none;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 260px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            z-index: 1001;
-        }
-        .attachments-panel.show { display: grid; }
-        .attach-btn-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); font-size: 11px; font-weight: 600; }
-        .attach-icon-circle { width: 46px; height: 46px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 17px; color: white; }
+    .feature-item:hover .icon-circle {
+      border-color: rgba(168, 85, 247, 0.7);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+      background: rgba(24, 23, 62, 0.6);
+    }
 
-        /* Chat Input Field */
-        .chat-win-input-area { padding: 10px 14px 18px 14px; background: var(--bg-dark); border-top: 1px solid var(--box-border); display: flex; align-items: center; gap: 10px; position: relative; }
-        .chat-input-wrapper { flex: 1; background: var(--box-bg); border-radius: 20px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--box-border); }
-        .chat-input-wrapper input { background: transparent; border: none; outline: none; color: var(--text-main); font-size: 14px; width: 100%; }
-        .chat-input-wrapper i { color: var(--text-muted); cursor: pointer; font-size: 17px; }
-        .action-btn-circle { background: var(--accent-purple); width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35); flex-shrink: 0; }
+    .icon-circle svg {
+      width: 24px;
+      height: 24px;
+      stroke: #cfd4fb;
+      fill: none;
+    }
 
-        /* Webpay Card */
-        .webpay-card {
-            background: var(--gradient-webpay);
-            border: 1.5px solid #7c3aed;
-            border-radius: 22px;
-            padding: 18px;
-            margin: 12px 0 16px 0;
-            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        .webpay-card::after {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: rgba(168, 85, 247, 0.15);
-            pointer-events: none;
-        }
-        .webpay-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .webpay-badge-active { background: #10b981; color: white; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.5px; }
-        .webpay-data-row { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; }
-        .webpay-data-label { color: var(--text-muted); font-weight: 500; }
-        .webpay-data-val { color: #ffffff; font-weight: 700; }
-        .webpay-actions { display: flex; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.15); }
-        .webpay-btn { flex: 1; background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.12); padding: 8px; border-radius: 12px; font-size: 11.5px; font-weight: 600; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .webpay-btn:hover { background: rgba(255,255,255,0.15); }
+    .feature-title {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #c9cce8;
+      letter-spacing: 0.2px;
+    }
 
-        /* Settings list */
-        .settings-list-container { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; }
-        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--box-bg); border-radius: 16px; cursor: pointer; transition: background 0.2s; margin-bottom: 6px; border: 1px solid var(--box-border); }
-        .settings-item:hover, .settings-item:active { background: var(--box-hover); }
-        .settings-left { display: flex; align-items: center; gap: 14px; color: var(--text-main); }
-        .settings-icon-box { width: 38px; height: 38px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 15px; color: white; }
-        .settings-info h4 { font-size: 14px; font-weight: 600; }
-        .settings-info p { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    /* Form Container (New) */
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      margin-top: auto;
+      margin-bottom: 30px;
+    }
 
-        /* Bottom Tab Navigation */
-        .home-bottom-nav { background-color: var(--bg-dark); display: flex; justify-content: space-between; align-items: center; padding: 8px 24px 18px 24px; border-top: 1px solid #1a1c2e; }
-        .nav-btn-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; }
-        .nav-btn-item.active { color: #8b5cf6; }
-        .nav-btn-item i { font-size: 19px; }
-        .center-waveform-btn { background: linear-gradient(135deg, #8b5cf6, #6366f1); width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; margin-top: -22px; box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45); }
+    .input-field {
+      width: 100%;
+      height: 58px;
+      border-radius: 16px;
+      background: rgba(14, 16, 42, 0.45);
+      border: 1.5px solid rgba(133, 137, 212, 0.22);
+      color: #ffffff;
+      padding: 0 20px;
+      font-size: 15.5px;
+      outline: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
 
-        /* Modals & Overlays */
-        .modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(5px); }
-        .modal-overlay.show { display: flex; }
-        .modal-card { background: #151623; border: 1px solid #2a2d40; border-radius: 24px; width: 85%; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        .modal-card h3 { color: var(--text-main); font-size: 17px; font-weight: 700; }
-        .modal-input { background: #0b0c16; border: 1px solid #2a2d40; padding: 12px 14px; border-radius: 14px; color: white; font-size: 14px; outline: none; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 6px; }
-        .modal-btn-cancel { background: #222538; color: var(--text-muted); border: none; flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
-        .modal-btn-add { background: #8b5cf6; color: white; border: none; flex: 1; padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .input-field::placeholder {
+      color: #727699;
+    }
 
-        /* Call Modal Screen */
-        .call-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0c0d1a; z-index: 4000; display: none; flex-direction: column; justify-content: space-between; align-items: center; padding: 60px 30px; }
-        .call-modal.show { display: flex; }
-        .call-user-avatar { width: 110px; height: 110px; border-radius: 50%; border: 3px solid var(--accent-purple); object-fit: cover; }
-        .call-controls { display: flex; gap: 20px; align-items: center; }
-        .call-btn-round { width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 20px; cursor: pointer; }
-    </style>
+    .input-field:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.3);
+      background: rgba(24, 23, 62, 0.65);
+    }
+
+    /* Bottom Buttons */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+    }
+
+    .btn {
+      width: 100%;
+      height: 56px;
+      border-radius: 28px;
+      font-size: 17px;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    /* Gradient Button */
+    .btn-primary {
+      background: linear-gradient(90deg, #6236f5 0%, #9838f5 52%, #c93df6 100%);
+      color: #ffffff;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(152, 56, 245, 0.48);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.22), transparent);
+      transform: rotate(30deg);
+      animation: btnShine 5s infinite ease-in-out;
+    }
+
+    @keyframes btnShine {
+      0%, 75% { left: -60%; }
+      100% { left: 140%; }
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 15px rgba(152, 56, 245, 0.3);
+    }
+
+    .btn-primary svg {
+      transition: transform 0.2s ease;
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* Outlined Button */
+    .btn-secondary {
+      background: rgba(8, 10, 28, 0.5);
+      border: 1.5px solid #28275c;
+      color: #ffffff;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.98);
+      background: rgba(22, 23, 56, 0.7);
+      border-color: #554fe2;
+    }
+
+/* ================= CHAT CONVERSATION SCREEN STYLES ================= */
+    .chat-bubble-out {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #5b22e6 0%, #7e2bf5 100%);
+      color: #ffffff;
+      padding: 10px 14px;
+      border-radius: 18px 18px 4px 18px;
+      max-width: 82%;
+      font-size: 14px;
+      line-height: 1.45;
+      position: relative;
+      word-break: break-word;
+      box-shadow: 0 4px 15px rgba(91, 34, 230, 0.25);
+      margin-bottom: 8px;
+    }
+
+    .chat-bubble-in {
+      align-self: flex-start;
+      background: #141728;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #e2e4f0;
+      padding: 10px 14px;
+      border-radius: 18px 18px 18px 4px;
+      max-width: 82%;
+      font-size: 14px;
+      line-height: 1.45;
+      position: relative;
+      word-break: break-word;
+      margin-bottom: 8px;
+    }
+
+    .msg-meta {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      color: rgba(255, 255, 255, 0.65);
+      margin-top: 4px;
+    }
+
+    /* Single / Double / Blue Ticks */
+    .tick-single { color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: bold; }
+    .tick-delivered { color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: bold; letter-spacing: -2px; }
+    .tick-seen { color: #00d4ff; font-size: 13px; font-weight: bold; letter-spacing: -2px; }
+
+    /* File Attachment Card */
+    .file-attachment-card {
+      align-self: flex-start;
+      background: #141728;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 84%;
+      margin-bottom: 8px;
+    }
+
+    /* Voice Message Card */
+    .voice-msg-card {
+      align-self: flex-start;
+      background: #141728;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 78%;
+      margin-bottom: 8px;
+    }
+
+
+  </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <!-- Add Contact Modal -->
-        <div class="modal-overlay" id="addContactModal">
-            <div class="modal-card">
-                <h3>Start New Chat</h3>
-                <p style="color: var(--text-muted); font-size: 12px; margin-top: -6px;">Enter the person's registered Wepzi mobile number:</p>
-                <input type="tel" id="newContactPhone" class="modal-input" placeholder="03XXXXXXXXX or +923XXXXXXXXX">
-                <input type="text" id="newContactMsg" class="modal-input" placeholder="First message (e.g. Assalam-o-Alaikum!)">
-                <div class="modal-btns">
-                    <button class="modal-btn-cancel" onclick="closeAddModal()">Cancel</button>
-                    <button class="modal-btn-add" id="btnSaveNewContact" onclick="saveNewContact()">Start Chat</button>
-                </div>
-            </div>
+  <div class="app-screen">
+
+    <!-- IN-APP NOTIFICATION TOAST (Chupa hua popup) -->
+    <div id="notificationToast" style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(20, 23, 40, 0.95); backdrop-filter: blur(10px); border: 1.5px solid rgba(168, 85, 247, 0.5); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; width: 90%; max-width: 360px; z-index: 999; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.8); cursor: pointer;">
+      <img id="notifAvatar" src="" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
+      <div style="flex: 1; min-width: 0;">
+        <div id="notifName" style="color: #ffffff; font-size: 14.5px; font-weight: 700; margin-bottom: 2px;">Name</div>
+        <div id="notifText" style="color: #a855f7; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">Message here...</div>
+      </div>
+      <!-- Chota sa App Icon/Dot -->
+      <div style="width: 8px; height: 8px; background: #00d4ff; border-radius: 50%; box-shadow: 0 0 10px #00d4ff;"></div>
+    </div>
+    
+    <!-- Ambient Breathing Radial Glows -->
+    <div class="ambient-glow blue"></div>
+    <div class="ambient-glow purple"></div>
+
+    <!-- Live Animated Dust Particles / Stars Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Animated Neon Glowing Wave Effect -->
+    <div class="wave-wrapper">
+      <svg class="wave-svg" viewBox="0 0 600 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="intenseGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur1"/>
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur2"/>
+            <feMerge>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="blur2"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+
+          <linearGradient id="neonLineGrad" x1="0%" y1="0%" x2="100%" y2="80%">
+            <stop offset="0%" stop-color="#00f0ff" />
+            <stop offset="30%" stop-color="#0088ff" />
+            <stop offset="68%" stop-color="#8b5cf6" />
+            <stop offset="100%" stop-color="#d946ef" />
+          </linearGradient>
+
+          <linearGradient id="smokeGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+            <stop offset="0%" stop-color="#0088ff" stop-opacity="0.3" />
+            <stop offset="50%" stop-color="#7c3aed" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#030412" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <g class="wave-smoke">
+          <path d="M -50 210 Q 120 220 230 290 T 550 220 L 550 420 L -50 420 Z" fill="url(#smokeGrad)" />
+          <path d="M -50 230 Q 180 200 320 310 T 650 250 L 650 450 L -50 450 Z" fill="url(#smokeGrad)" opacity="0.6"/>
+        </g>
+
+        <g class="wave-layer-2">
+          <path d="M -20 240 C 130 225, 210 325, 360 330 C 470 335, 540 280, 640 215" 
+                stroke="#9333ea" stroke-width="4.5" filter="url(#intenseGlow)" opacity="0.75"/>
+        </g>
+
+        <g class="wave-layer-1">
+          <path d="M -40 215 C 100 210, 180 275, 290 300 C 400 325, 480 280, 620 200" 
+                stroke="url(#neonLineGrad)" stroke-width="5" filter="url(#intenseGlow)" />
+          <path d="M -40 215 C 100 210, 180 275, 290 300 C 400 325, 480 280, 620 200" 
+                stroke="#f0fbff" stroke-width="1.8" opacity="0.9" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MAIN SCREEN CONTENT                            -->
+    <!-- ============================================== -->
+    <div id="mainScreen" class="screen-content">
+      
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="logo-container">
+          <svg class="logo-svg" viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="exactLogoGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stop-color="#cb55f8" />
+                <stop offset="42%" stop-color="#7e3bf5" />
+                <stop offset="78%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#40cbf8" />
+              </linearGradient>
+            </defs>
+            <path d="M 33 34 L 55 106 L 80 56 L 105 106 L 127 34" 
+                  stroke="url(#exactLogoGrad)" stroke-width="23" 
+                  stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </div>
+        <h1 class="brand-title">Wepzi app </h1>
+        <p class="brand-tagline">Connect Beyond Limits</p>
+      </div>
 
-        <!-- QR Code Modal -->
-        <div class="modal-overlay" id="qrModal" onclick="closeQrModal()">
-            <div class="modal-card" style="align-items: center; text-align: center;" onclick="event.stopPropagation()">
-                <h3>My Wepzi QR Code</h3>
-                <p style="color: var(--text-muted); font-size: 12px;">Scan this code to start a secure chat with me.</p>
-                <div style="background: white; padding: 18px; border-radius: 18px; margin: 10px 0;">
-                    <i class="fa-solid fa-qrcode" style="font-size: 130px; color: #0b0c16;"></i>
-                </div>
-                <h4 style="color: white; font-size: 15px;" id="qrModalName">Ali Raza</h4>
-                <p style="color: #a855f7; font-size: 12.5px; font-weight: 700;" id="qrModalId">@aliraza_786</p>
-                <button class="btn-gradient" style="margin-top: 10px;" onclick="closeQrModal()">Close</button>
-            </div>
+      <!-- Features Row -->
+      <div class="features-row">
+        <div class="feature-item" onclick="selectFeature('Chat')">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 10l2.5 2.5L16 8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="feature-title">Chat</span>
         </div>
-
-        <!-- Webpay Top-up / Send Modal -->
-        <div class="modal-overlay" id="webpayActionModal">
-            <div class="modal-card">
-                <h3 id="webpayActionTitle">Top Up Webpay Balance</h3>
-                <input type="number" id="webpayAmountInput" class="modal-input" placeholder="Enter amount in PKR (e.g. 500)">
-                <div class="modal-btns">
-                    <button class="modal-btn-cancel" onclick="closeWebpayActionModal()">Cancel</button>
-                    <button class="modal-btn-add" onclick="processWebpayAction()">Confirm</button>
-                </div>
-            </div>
+        <div class="feature-item" onclick="selectFeature('Voice')">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke-linecap="round"/>
+              <line x1="12" y1="19" x2="12" y2="22" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="feature-title">Voice</span>
         </div>
-
-        <!-- Active / Outgoing Call Modal -->
-        <div class="call-modal" id="callModal">
-            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                <img src="" id="callAvatar" class="call-user-avatar" alt="Avatar">
-                <h2 style="color: white; font-size: 22px; font-weight: 700;" id="callName">Contact</h2>
-                <p style="color: #10b981; font-size: 13px; font-weight: 600;" id="callStatusText">Ringing...</p>
-                <p style="color: var(--text-muted); font-size: 12px;" id="callTimer">00:00</p>
-            </div>
-            <div class="call-controls">
-                <div class="call-btn-round" style="background: #222538;" onclick="alert('Microphone Muted')"><i class="fa-solid fa-microphone-slash"></i></div>
-                <div class="call-btn-round" style="background: #222538;" onclick="alert('Speaker Toggled')"><i class="fa-solid fa-volume-high"></i></div>
-                <div class="call-btn-round" style="background: #ef4444;" onclick="endCall()"><i class="fa-solid fa-phone-slash"></i></div>
-            </div>
+        <div class="feature-item" onclick="selectFeature('Files')">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" stroke-linejoin="round"/>
+              <line x1="12" y1="11" x2="12" y2="17" stroke-linecap="round"/>
+              <line x1="9" y1="14" x2="15" y2="14" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="feature-title">Files</span>
         </div>
-
-        <!-- Incoming Call Modal Screen -->
-        <div class="call-modal" id="incomingCallModal">
-            <div style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-                <img src="" id="incomingAvatar" class="call-user-avatar" alt="Avatar">
-                <h2 style="color: white; font-size: 22px; font-weight: 700;" id="incomingName">User</h2>
-                <p style="color: #ec4899; font-size: 14px; font-weight: 600;" id="incomingType">Incoming Voice Call...</p>
-            </div>
-            <div class="call-controls" style="gap: 40px;">
-                <div class="call-btn-round" style="background: #ef4444; width: 60px; height: 60px;" onclick="declineIncomingCall()"><i class="fa-solid fa-phone-slash"></i></div>
-                <div class="call-btn-round" style="background: #10b981; width: 60px; height: 60px;" onclick="acceptIncomingCall()"><i class="fa-solid fa-phone"></i></div>
-            </div>
+        <div class="feature-item" onclick="selectFeature('AI')">
+          <div class="icon-circle">
+            <svg viewBox="0 0 24 24" stroke-width="1.8">
+              <path d="M12 12 C9 5, 4 6, 5 10 C6 13, 11 12.5, 12 12" stroke-linecap="round"/>
+              <path d="M12 12 C15 5, 20 6, 19 10 C18 13, 13 12.5, 12 12" stroke-linecap="round"/>
+              <path d="M12 13 C10 16, 8 19, 10 20 C11.5 20.5, 12 17, 12 13" stroke-linecap="round"/>
+              <path d="M12 13 C14 16, 16 19, 14 20 C12.5 20.5, 12 17, 12 13" stroke-linecap="round"/>
+              <circle cx="12" cy="12.5" r="1.2" fill="#cfd4fb"/>
+            </svg>
+          </div>
+          <span class="feature-title">AI</span>
         </div>
+      </div>
 
-        <!-- Audio Elements for Ringing, Dialtone & Remote Voice -->
-        <audio id="ringtoneAudio" loop preload="auto" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
-        <audio id="dialtoneAudio" loop preload="auto" src="https://actions.google.com/sounds/v1/telephones/phone_ring.ogg"></audio>
-        <audio id="remoteAudioStream" autoplay playsinline></audio>
+      <!-- Main Screen Buttons -->
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btnGetStarted">
+          <span>Get Started</span>
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="13 6 19 12 13 18"></polyline>
+          </svg>
+        </button>
+        <button class="btn btn-secondary" id="btnLogin">Login</button>
+      </div>
+    </div>
 
-        <div class="screens-wrapper show-screen-1" id="screensWrapper">
-            
-            <!-- ================= SCREEN 1: WELCOME ================= -->
-            <div class="screen" id="welcomeScreen">
-                <div class="welcome-top">
-                    <div class="logo-container">
-                        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="gradOrange" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9a44" /><stop offset="100%" stop-color="#fc6076" /></linearGradient>
-                                <linearGradient id="gradPink" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fc6076" /><stop offset="100%" stop-color="#a32cf5" /></linearGradient>
-                                <linearGradient id="gradPurple" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a32cf5" /><stop offset="100%" stop-color="#5521ea" /></linearGradient>
-                            </defs>
-                            <path d="M20 25 Q 32 90 45 80" stroke="url(#gradOrange)" stroke-width="15" stroke-linecap="round"/>
-                            <path d="M75 80 Q 80 40 85 30" stroke="url(#gradPurple)" stroke-width="15" stroke-linecap="round"/>
-                            <path d="M45 80 Q 55 20 75 80" stroke="url(#gradPink)" stroke-width="15" stroke-linecap="round"/>
-                            <circle cx="90" cy="18" r="6" fill="#ff7f50" />
-                        </svg>
-                    </div>
-                    <h1 class="app-title">Wepzi</h1>
-                    <p class="app-subtitle">Connect. Secure. Yours.</p>
-                    <p class="app-description">Private. Fast. Feature Rich.</p>
-                </div>
 
-                <div>
-                    <div class="language-selector" onclick="alert('Language selected: English (Default)')">
-                        <div class="lang-left"><i class="fa-solid fa-globe"></i><span>English</span></div>
-                        <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 12px;"></i>
-                    </div>
-                    <button class="btn-gradient" onclick="goToScreen(2)">Get Started <i class="fa-solid fa-arrow-right"></i></button>
-                    <p class="footer-terms">By continuing, you agree to our<br><a href="javascript:void(0)">Terms of Service</a> &gt; <a href="javascript:void(0)">Privacy Policy</a></p>
-                </div>
-            </div>
+    <!-- ============================================== -->
+    <!-- SIGNUP (CREATE ACCOUNT) SCREEN                 -->
+    <!-- ============================================== -->
+    <div id="signupScreen" class="screen-content" style="display: none;">
+      
+      <div class="header-section" style="margin-top: 15px;">
+        <h2 class="brand-title" style="font-size: 34px;">Create Account</h2>
+        <p class="brand-tagline">Start your journey with Wepzi</p>
+      </div>
 
-            <!-- ================= SCREEN 2: PHONE NUMBER ================= -->
-            <div class="screen" id="phoneScreen">
-                <div class="top-nav"><div class="back-btn" onclick="goToScreen(1)"><i class="fa-solid fa-arrow-left"></i></div></div>
-                <div class="phone-content">
-                    <div class="heading-group">
-                        <h2>Enter Your <span class="gradient-text">Phone Number</span></h2>
-                        <p>We will send you a 6-digit verification code to confirm your number.</p>
-                    </div>
-                    <div>
-                        <div class="country-box">
-                            <div class="country-left"><span>🇵🇰</span><span>Pakistan (+92)</span></div>
-                            <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 12px;"></i>
-                        </div>
-                        <div class="phone-input-box" style="margin-top: 12px;">
-                            <i class="fa-solid fa-phone"></i>
-                            <input type="tel" id="phoneNumber" placeholder="3XXXXXXXXX" maxlength="11">
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <button class="btn-gradient" id="sendOtpBtn" onclick="handleSendOTP()">Continue <i class="fa-solid fa-arrow-right"></i></button>
-                    <div class="security-badge"><i class="fa-solid fa-lock"></i><span>Your number is secure and encrypted.</span></div>
-                </div>
-            </div>
+      <!-- Sign Up Form -->
+      <div class="form-container">
+        <input type="text" id="regUsername" class="input-field" placeholder="Username" autocomplete="off">
+        <input type="email" id="regEmail" class="input-field" placeholder="Email Address" autocomplete="off">
+        <input type="password" id="regPassword" class="input-field" placeholder="Password">
+      </div>
 
-            <!-- ================= SCREEN 3: OTP VERIFICATION ================= -->
-            <div class="screen" id="otpScreen">
-                <div class="top-nav"><div class="back-btn" onclick="goToScreen(2)"><i class="fa-solid fa-arrow-left"></i></div></div>
-                <div class="otp-content">
-                    <div class="heading-group">
-                        <h2><span class="purple-text">Verify</span> Your Number</h2>
-                        <p>Enter the 6-digit code sent via SMS to <span class="highlight-phone" id="displayUserPhone">+92 300 1234567</span></p>
-                    </div>
-                    <div>
-                        <div class="otp-boxes-container">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 0)" onkeydown="handleOtpBackspace(event, 0)">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 1)" onkeydown="handleOtpBackspace(event, 1)">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 2)" onkeydown="handleOtpBackspace(event, 2)">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 3)" onkeydown="handleOtpBackspace(event, 3)">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 4)" onkeydown="handleOtpBackspace(event, 4)">
-                            <input type="tel" class="otp-input" maxlength="1" oninput="handleOtpInput(this, 5)" onkeydown="handleOtpBackspace(event, 5)">
-                        </div>
-                        <div class="resend-box" id="resendBox">Resend code in <span class="timer" id="timerDisplay">00:45</span></div>
-                        <div class="expired-error" id="expiredError">⚠️ Code expired! Click "Resend Code" for new SMS.</div>
-                    </div>
-                </div>
-                <div>
-                    <button class="btn-gradient" id="verifyOtpBtn" onclick="handleVerifyOTP()">Verify & Login</button>
-                    <div class="security-badge"><i class="fa-solid fa-lock"></i><span>End-to-End Encrypted Verification</span></div>
-                </div>
-            </div>
-
-            <!-- ================= SCREEN 4: PROFILE SETUP ================= -->
-            <div class="screen" id="profileScreen">
-                <div class="top-nav"><div class="back-btn" onclick="goToScreen(3)"><i class="fa-solid fa-arrow-left"></i></div></div>
-                <div class="profile-content">
-                    <div class="heading-group">
-                        <h2><span class="purple-text">Create</span> Your Profile</h2>
-                        <p>Add your details to get started with Wepzi and auto-activate your Webpay wallet.</p>
-                    </div>
-                    <div class="avatar-wrapper">
-                        <input type="file" id="fileUploadInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                        <div class="avatar-box" onclick="document.getElementById('fileUploadInput').click()">
-                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300" alt="Avatar" class="avatar-img" id="avatarPreview">
-                            <div class="camera-badge"><i class="fa-solid fa-camera"></i></div>
-                        </div>
-                    </div>
-                    <div class="profile-inputs">
-                        <div class="input-row">
-                            <div class="input-left-label"><i class="fa-regular fa-user"></i><span>Full Name</span></div>
-                            <input type="text" class="name-field-input" id="fullNameInput" placeholder="Ali Raza" oninput="autoGenerateWepziId(this.value)">
-                        </div>
-                        <div class="wepzi-id-box">
-                            <div class="id-details">
-                                <div class="id-title-row"><i class="fa-solid fa-fingerprint"></i><span>Wepzi ID (username)</span></div>
-                                <span class="id-generated-val" id="wepziIdDisplay">aliraza_786</span>
-                            </div>
-                            <i class="fa-solid fa-circle-check verified-check"></i>
-                        </div>
-                    </div>
-                </div>
-                <div><button class="btn-gradient" onclick="handleProfileContinue()">Continue <i class="fa-solid fa-arrow-right"></i></button></div>
-            </div>
-
-            <!-- ================= SCREEN 5: ALLOW PERMISSIONS ================= -->
-            <div class="screen" id="permissionsScreen">
-                <div class="top-nav"><div class="back-btn" onclick="goToScreen(4)"><i class="fa-solid fa-arrow-left"></i></div></div>
-                <div class="permissions-content">
-                    <div class="heading-group">
-                        <h2>Allow Permissions</h2>
-                        <p>To deliver the best experience, we need access to the following.</p>
-                    </div>
-                    <div class="permissions-list">
-                        <div class="permission-card" onclick="togglePermission(this)">
-                            <div class="perm-left"><div class="perm-icon-box icon-contacts"><i class="fa-solid fa-user"></i></div><div class="perm-info"><h4>Contacts</h4><p>To find and connect with your friends.</p></div></div>
-                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="permission-card" onclick="togglePermission(this)">
-                            <div class="perm-left"><div class="perm-icon-box icon-notif"><i class="fa-solid fa-bell"></i></div><div class="perm-info"><h4>Notifications</h4><p>To keep you updated with messages and calls.</p></div></div>
-                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="permission-card" onclick="togglePermission(this)">
-                            <div class="perm-left"><div class="perm-icon-box icon-mic"><i class="fa-solid fa-microphone"></i></div><div class="perm-info"><h4>Microphone</h4><p>To record and send voice messages.</p></div></div>
-                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="permission-card" onclick="togglePermission(this)">
-                            <div class="perm-left"><div class="perm-icon-box icon-camera"><i class="fa-solid fa-camera"></i></div><div class="perm-info"><h4>Camera</h4><p>To take photos and make video calls.</p></div></div>
-                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                        <div class="permission-card" onclick="togglePermission(this)">
-                            <div class="perm-left"><div class="perm-icon-box icon-storage"><i class="fa-solid fa-folder-open"></i></div><div class="perm-info"><h4>Storage</h4><p>To share photos, videos and files.</p></div></div>
-                            <div class="perm-check-badge"><i class="fa-solid fa-check"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div><button class="btn-gradient" onclick="handlePermissionsContinue()">Enter Wepzi <i class="fa-solid fa-arrow-right"></i></button></div>
-            </div>
-
-            <!-- ================= SCREEN 6: MAIN CHAT / HOME ================= -->
-            <div class="screen screen-home" id="homeScreen">
-                
-                <!-- Sidebar Overlay & Drawer -->
-                <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
-                <div class="sidebar-drawer" id="sidebarDrawer">
-                    <div class="drawer-header" onclick="switchTab('profile')">
-                        <img src="" class="drawer-avatar" id="drawerMyAvatar" alt="My Profile">
-                        <div class="drawer-user-info">
-                            <h4 id="drawerMyName">Ali Raza</h4>
-                            <p id="drawerMyId">@aliraza_786</p>
-                        </div>
-                    </div>
-                    <div class="drawer-menu-list">
-                        <div class="drawer-item" onclick="switchTab('chats')"><i class="fa-solid fa-comment-dots"></i> Chats</div>
-                        <div class="drawer-item" onclick="switchTab('calls')"><i class="fa-solid fa-phone"></i> Calls</div>
-                        <div class="drawer-item" onclick="switchTab('status')"><i class="fa-regular fa-circle-check"></i> Status</div>
-                        <div class="drawer-item" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i> Settings</div>
-                        <div class="drawer-item" onclick="openQrModal()"><i class="fa-solid fa-qrcode"></i> My QR Code</div>
-                        <div class="drawer-item" onclick="logoutUser()" style="color: #ef4444;"><i class="fa-solid fa-right-from-bracket" style="color: #ef4444;"></i> Log Out</div>
-                    </div>
-                </div>
-
-                <!-- Complete Real-Time Fullscreen Chat Window -->
-                <div class="chat-window" id="chatWindow">
-                    <div class="chat-win-header">
-                        <div class="chat-win-left">
-                            <i class="fa-solid fa-arrow-left" style="color: white; font-size: 16px; cursor: pointer; padding: 6px;" onclick="closeChatWindow()"></i>
-                            <img src="" class="chat-row-avatar" id="chatWinAvatar" alt="Avatar">
-                            <div class="chat-win-info">
-                                <h4 id="chatWinName">Contact</h4>
-                                <p id="chatWinStatus">online</p>
-                            </div>
-                        </div>
-                        <div class="chat-win-right">
-                            <i class="fa-solid fa-video" onclick="startCall('video')"></i>
-                            <i class="fa-solid fa-phone" onclick="startCall('voice')"></i>
-                        </div>
-                    </div>
-
-                    <!-- Live Message Stream -->
-                    <div class="chat-win-messages" id="chatMessagesFeed"></div>
-
-                    <!-- Attachments Panel -->
-                    <div class="attachments-panel" id="attachmentsPanel">
-                        <div class="attach-btn-item" onclick="alert('Document feature active')"><div class="attach-icon-circle" style="background: #7c3aed;"><i class="fa-solid fa-file"></i></div><span>Document</span></div>
-                        <div class="attach-btn-item" onclick="alert('Camera active')"><div class="attach-icon-circle" style="background: #ec4899;"><i class="fa-solid fa-camera"></i></div><span>Camera</span></div>
-                        <div class="attach-btn-item" onclick="alert('Gallery active')"><div class="attach-icon-circle" style="background: #3b82f6;"><i class="fa-solid fa-image"></i></div><span>Gallery</span></div>
-                        <div class="attach-btn-item" onclick="alert('Location active')"><div class="attach-icon-circle" style="background: #10b981;"><i class="fa-solid fa-location-dot"></i></div><span>Location</span></div>
-                        <div class="attach-btn-item" onclick="alert('Audio active')"><div class="attach-icon-circle" style="background: #f59e0b;"><i class="fa-solid fa-microphone"></i></div><span>Audio</span></div>
-                        <div class="attach-btn-item" onclick="alert('Contact active')"><div class="attach-icon-circle" style="background: #06b6d4;"><i class="fa-solid fa-user"></i></div><span>Contact</span></div>
-                    </div>
-
-                    <!-- Input Toolbar -->
-                    <div class="chat-win-input-area">
-                        <div class="chat-input-wrapper">
-                            <i class="fa-regular fa-face-smile" onclick="alert('Emoji panel')"></i>
-                            <i class="fa-solid fa-paperclip" onclick="toggleAttachments()"></i>
-                            <input type="text" id="chatMessageInput" placeholder="Type a message..." oninput="handleUserTyping()" onkeydown="handleInputKeyPress(event)">
-                        </div>
-                        <div class="action-btn-circle" onclick="sendChatMessage()">
-                            <i class="fa-solid fa-paper-plane" style="font-size: 15px;"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigation Header -->
-                <div class="home-header">
-                    <div class="home-header-left">
-                        <i class="fa-solid fa-bars" onclick="toggleSidebar(true)"></i>
-                        <span class="home-logo" onclick="switchTab('chats')">Wepzi</span>
-                    </div>
-                    <div class="home-header-right">
-                        <i class="fa-solid fa-magnifying-glass" onclick="toggleSearchBar()"></i>
-                        <button class="add-chat-btn" onclick="togglePlusDropdown()"><i class="fa-solid fa-plus"></i></button>
-                        
-                        <div class="plus-dropdown" id="plusDropdown">
-                            <div class="dropdown-item" onclick="openAddModal()"><i class="fa-solid fa-comment-medical"></i> New Chat</div>
-                            <div class="dropdown-item" onclick="alert('New Group created')"><i class="fa-solid fa-users"></i> New Group</div>
-                            <div class="dropdown-item" onclick="openAddModal()"><i class="fa-solid fa-user-plus"></i> New Contact</div>
-                            <div class="dropdown-item" onclick="alert('New Broadcast created')"><i class="fa-solid fa-bullhorn"></i> New Broadcast</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Search Container -->
-                <div class="search-container" id="searchContainer">
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="globalSearchInput" placeholder="Search chats by name or number..." oninput="handleGlobalSearch(this.value)">
-                    </div>
-                </div>
-
-                <!-- 1. CHATS TAB VIEW -->
-                <div id="tabChatsView" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-                    <!-- Status Stories -->
-                    <div class="status-container">
-                        <div class="status-card" onclick="switchTab('status')">
-                            <div class="status-avatar-wrapper">
-                                <img src="" id="homeMyStatusAvatar" alt="My Status">
-                                <div class="status-add-icon"><i class="fa-solid fa-plus"></i></div>
-                            </div>
-                            <span class="status-label">My Status</span>
-                        </div>
-                    </div>
-
-                    <!-- Filter Chips -->
-                    <div class="filter-bar">
-                        <button class="chip active" onclick="filterChats('all', this)">All</button>
-                        <button class="chip" onclick="filterChats('unread', this)">Unread</button>
-                        <button class="chip" onclick="filterChats('groups', this)">Groups</button>
-                    </div>
-
-                    <!-- Live Chat Rows Feed -->
-                    <div class="chat-body-container" id="chatListContainer">
-                        <div class="empty-chat-state" id="emptyChatState">
-                            <div class="empty-icon-circle"><i class="fa-regular fa-comment-dots"></i></div>
-                            <h3>No chats yet</h3>
-                            <p>Click the <strong>+</strong> button at the top to add a registered contact's number and start real-time messaging.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. CALLS TAB VIEW -->
-                <div id="tabCallsView" class="chat-body-container" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="color: white; font-size: 16px; font-weight: 700;">Recent Call Logs</h3>
-                        <span style="color: #ef4444; font-size: 12px; cursor: pointer; font-weight: 600;" onclick="clearCallLogs()">Clear Logs</span>
-                    </div>
-                    <div id="callsListContainer"></div>
-                </div>
-
-                <!-- 3. STATUS TAB VIEW -->
-                <div id="tabStatusView" class="chat-body-container" style="display: none;">
-                    <div class="settings-item" style="border: none; padding: 10px 0; background: transparent;">
-                        <div class="settings-left">
-                            <div class="status-avatar-wrapper" style="width: 52px; height: 52px; padding: 2px;">
-                                <img src="" id="statusMyAvatar" alt="My Profile">
-                            </div>
-                            <div class="settings-info">
-                                <h4 style="color: white;">My Status</h4>
-                                <p style="color: var(--text-muted);">Tap to share an update with contacts</p>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-camera" style="color: var(--accent-purple); font-size: 18px;" onclick="alert('Camera activated for status')"></i>
-                    </div>
-                </div>
-
-                <!-- 4. SETTINGS TAB VIEW -->
-                <div id="tabSettingsView" class="chat-body-container" style="display: none;">
-                    <div class="settings-list-container">
-                        
-                        <!-- Profile Card Item -->
-                        <div class="settings-item" onclick="switchTab('profile')">
-                            <div class="settings-left">
-                                <img src="" class="chat-row-avatar" id="settingsMyAvatar" alt="Profile">
-                                <div class="settings-info">
-                                    <h4 id="settingsMyName" style="font-weight: 700;">Ali Raza</h4>
-                                    <p id="settingsMyId">@aliraza_786</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-qrcode" style="color: var(--accent-purple); font-size: 20px;" onclick="event.stopPropagation(); openQrModal();"></i>
-                        </div>
-
-                        <!-- Webpay Wallet Card -->
-                        <div class="webpay-card">
-                            <div class="webpay-card-header">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa-solid fa-wallet" style="color: #a855f7; font-size: 20px;"></i>
-                                    <span style="color: #ffffff; font-weight: 800; font-size: 15px;">Webpay Account</span>
-                                </div>
-                                <span class="webpay-badge-active">ACTIVE</span>
-                            </div>
-                            
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Registered Mobile:</span>
-                                <span class="webpay-data-val" id="webpayLinkedNumber">+92 300 0000000</span>
-                            </div>
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Webpay Account ID:</span>
-                                <span class="webpay-data-val" style="color: #c084fc;" id="webpayAccountId">WP-3000000000</span>
-                            </div>
-                            <div class="webpay-data-row">
-                                <span class="webpay-data-label">Wallet Balance:</span>
-                                <span class="webpay-data-val" style="color: #10b981;" id="webpayBalance">Rs. 0.00 PKR</span>
-                            </div>
-
-                            <div class="webpay-actions">
-                                <div class="webpay-btn" onclick="openWebpayActionModal('topup')"><i class="fa-solid fa-plus-circle"></i> Top Up</div>
-                                <div class="webpay-btn" onclick="openWebpayActionModal('send')"><i class="fa-solid fa-paper-plane"></i> Send Money</div>
-                            </div>
-                        </div>
-
-                        <!-- Microphone Test Item -->
-                        <div class="settings-item" onclick="testMicrophone()">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #10b981;"><i class="fa-solid fa-microphone"></i></div>
-                                <div class="settings-info">
-                                    <h4>Test Microphone</h4>
-                                    <p id="micStatusText">Tap to check mic permissions</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                        </div>
-
-                        <!-- Call Ringtone Toggle Item -->
-                        <div class="settings-item" onclick="toggleSetting('ringtone')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #8b5cf6;"><i class="fa-solid fa-bell"></i></div>
-                                <div class="settings-info">
-                                    <h4>Call Ringtone</h4>
-                                    <p id="ringtoneStatusText">Enabled</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-toggle-on" id="ringtoneToggleIcon" style="color: #10b981; font-size: 22px;"></i>
-                        </div>
-
-                        <!-- Vibrate Toggle Item -->
-                        <div class="settings-item" onclick="toggleSetting('vibrate')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #f59e0b;"><i class="fa-solid fa-mobile-screen-button"></i></div>
-                                <div class="settings-info">
-                                    <h4>Vibrate on Call</h4>
-                                    <p id="vibrateStatusText">Enabled</p>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-toggle-on" id="vibrateToggleIcon" style="color: #10b981; font-size: 22px;"></i>
-                        </div>
-
-                        <!-- Account Settings -->
-                        <div class="settings-item" onclick="alert('Account & Security settings')">
-                            <div class="settings-left">
-                                <div class="settings-icon-box" style="background: #3b82f6;"><i class="fa-solid fa-key"></i></div>
-                                <div class="settings-info"><h4>Account</h4><p>Security notifications, two-step verification</p></div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); font-size: 11px;"></i>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- 5. PROFILE TAB VIEW -->
-                <div id="tabProfileView" class="chat-body-container" style="display: none; padding: 25px 20px;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 25px;">
-                        <img src="" class="chat-row-avatar" id="profileTabAvatar" style="width: 95px; height: 95px; border: 3px solid var(--accent-purple);" alt="Profile">
-                        <h3 style="color: white; font-size: 20px; font-weight: 700;" id="profileTabName">Ali Raza</h3>
-                        <p style="color: var(--text-muted); font-size: 13.5px;" id="profileTabId">@aliraza_786</p>
-                    </div>
-                    <div class="settings-list-container">
-                        <div class="settings-item" onclick="editProfileValue('Name')">
-                            <div class="settings-left">
-                                <div class="settings-info">
-                                    <p style="color: var(--text-muted); font-size: 11px;">Name</p>
-                                    <h4 style="color: white; font-size: 14.5px;" id="profileEditName">Ali Raza</h4>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-pen" style="color: var(--text-muted); font-size: 13px;"></i>
-                        </div>
-                        <div class="settings-item" onclick="editProfileValue('About')">
-                            <div class="settings-left">
-                                <div class="settings-info">
-                                    <p style="color: var(--text-muted); font-size: 11px;">About</p>
-                                    <h4 style="color: white; font-size: 14.5px;" id="profileEditAbout">Available</h4>
-                                </div>
-                            </div>
-                            <i class="fa-solid fa-pen" style="color: var(--text-muted); font-size: 13px;"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bottom Tab Navigation -->
-                <div class="home-bottom-nav">
-                    <div class="nav-btn-item active" id="btnTabChats" onclick="switchTab('chats')"><i class="fa-solid fa-comment-dots"></i><span>Chats</span></div>
-                    <div class="nav-btn-item" id="btnTabCalls" onclick="switchTab('calls')"><i class="fa-solid fa-phone"></i><span>Calls</span></div>
-                    <div class="center-waveform-btn" onclick="openAddModal()"><i class="fa-solid fa-plus"></i></div>
-                    <div class="nav-btn-item" id="btnTabStatus" onclick="switchTab('status')"><i class="fa-regular fa-circle-check"></i><span>Status</span></div>
-                    <div class="nav-btn-item" id="btnTabSettings" onclick="switchTab('settings')"><i class="fa-solid fa-gear"></i><span>Settings</span></div>
-                </div>
-            </div>
-
-        </div>
+     <!-- Form Buttons -->
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btnRegister">
+          <span>Sign Up</span>
+        </button>
+        <button class="btn btn-secondary" id="btnBack">Back</button>
+      </div>
 
     </div>
 
-    <!-- Complete Application Logic -->
-    <script>
-        const textbeeConfig = {
-            apiKey: "txb_LjrQt9fM8gIfwhw2w0G1C8qLEhSvfgsH",
-            deviceId: "6a88d6ce6a4667e3e3385f67"
-        };
+<!-- ============================================== -->
+    <!-- LOGIN SCREEN                                   -->
+    <!-- ============================================== -->
+    <div id="loginScreen" class="screen-content" style="display: none;">
+      
+      <div class="header-section" style="margin-top: 15px;">
+        <h2 class="brand-title" style="font-size: 34px;">Welcome Back</h2>
+        <p class="brand-tagline">Login to your Wepzi account</p>
+      </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBPJc5O2FiQadIOSd6s4o7Ox1fQz-MkVtw",
-            authDomain: "wepziapp.firebaseapp.com",
-            projectId: "wepziapp",
-            storageBucket: "wepziapp.firebasestorage.app",
-            messagingSenderId: "842699350752",
-            appId: "1:842699350752:web:81bb08b86f7175fa5da685",
-            measurementId: "G-PCX9CKTFM3"
-        };
+      <!-- Login Form -->
+      <div class="form-container">
+        <input type="email" id="loginEmail" class="input-field" placeholder="Email Address" autocomplete="off">
+        <input type="password" id="loginPassword" class="input-field" placeholder="Password">
+        
+        <!-- Forget Password Link -->
+        <p id="forgotPasswordBtn" style="text-align: right; font-size: 13.5px; color: #a855f7; cursor: pointer; margin-top: -6px; margin-right: 5px; text-decoration: underline;">Forgot Password?</p>
+      </div>
 
-        // Initialize Firebase
-        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY_HERE") {
-            firebase.initializeApp(firebaseConfig);
-        }
+      <!-- Form Buttons -->
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btnSubmitLogin">
+          <span>Login</span>
+        </button>
+        <button class="btn btn-secondary" id="btnBackFromLogin">Back</button>
+      </div>
 
-        // WebRTC Configuration (Google STUN)
-        const rtcServers = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-        };
+    </div>
 
-        // Global UI Elements
-        const wrapper = document.getElementById('screensWrapper');
-        const phoneInput = document.getElementById('phoneNumber');
-        const displayUserPhone = document.getElementById('displayUserPhone');
-        const otpInputs = document.querySelectorAll('.otp-input');
-        const timerDisplay = document.getElementById('timerDisplay');
-        const resendBox = document.getElementById('resendBox');
-        const expiredError = document.getElementById('expiredError');
-        const avatarPreview = document.getElementById('avatarPreview');
-        const fullNameInput = document.getElementById('fullNameInput');
-        const wepziIdDisplay = document.getElementById('wepziIdDisplay');
-        const homeMyStatusAvatar = document.getElementById('homeMyStatusAvatar');
-        const addContactModal = document.getElementById('addContactModal');
-        const chatListContainer = document.getElementById('chatListContainer');
-        const emptyChatState = document.getElementById('emptyChatState');
-        const plusDropdown = document.getElementById('plusDropdown');
 
-        const sidebarDrawer = document.getElementById('sidebarDrawer');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const searchContainer = document.getElementById('searchContainer');
-        const chatWindow = document.getElementById('chatWindow');
-        const chatMessagesFeed = document.getElementById('chatMessagesFeed');
-        const chatMessageInput = document.getElementById('chatMessageInput');
-        const attachmentsPanel = document.getElementById('attachmentsPanel');
+    <!-- PROFILE PICTURE UPLOAD SCREEN (Mobile Box Ke Andar) -->
+    <div id="profileUploadScreen" class="screen-content" style="display: none; align-items: center; justify-content: center; text-align: center; height: 100%;">
+      <div style="margin-top: 20px;">
+        <h2 class="brand-title" style="font-size: 28px;">Profile Picture</h2>
+        <p class="brand-tagline" style="margin-bottom: 30px;">Choose a photo for your account</p>
 
-        // Audio and Call Streams
-        const ringtoneAudio = document.getElementById('ringtoneAudio');
-        const dialtoneAudio = document.getElementById('dialtoneAudio');
-        const remoteAudioStream = document.getElementById('remoteAudioStream');
+        <!-- Tap to select image -->
+        <label for="fileInput" id="picPreviewContainer" style="display: inline-block; width: 140px; height: 140px; border-radius: 50%; border: 2px dashed #a855f7; cursor: pointer; overflow: hidden; position: relative;">
+          <span id="cameraIcon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px;">📷</span>
+          <img id="previewImage" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        </label>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
 
-        let generatedOTP = null;
-        let countdownTimer = null;
-        let timeLeft = 45;
-        let isExpired = false;
+        <div class="btn-group" style="margin-top: 40px; width: 100%;">
+          <button class="btn btn-primary" id="btnUploadComplete" style="display: none;">Complete Setup</button>
+        </div>
+      </div>
+    </div>
 
-        let currentActiveChatId = null;
-        let currentChatPartnerPhone = null;
-        let currentChatPartnerName = null;
-        let currentChatPartnerAvatar = null;
-        let unsubscribeChatsList = null;
-        let unsubscribeMessages = null;
-        let unsubscribePartnerPresence = null;
-        let unsubscribeChatDoc = null;
-        let typingTimeout = null;
+    <!-- ============================================== -->
+    <!-- MAIN CHAT DASHBOARD SCREEN (SCREENSHOT DESIGN)  -->
+    <!-- ============================================== -->
+    <div id="chatDashboardScreen" class="screen-content" style="display: none; background: #03040e; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 10; flex-direction: column; overflow: hidden;">
+      
+      <!-- Top App Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 22px 20px 14px 20px;">
+        <h1 style="font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px;">Wepzi</h1>
+        <div style="display: flex; align-items: center; gap: 18px; color: #ffffff;">
+          <!-- Search -->
+          <svg style="width: 21px; height: 21px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <!-- Plus -->
+          <svg style="width: 23px; height: 23px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <!-- 3-Dots Menu -->
+          <svg style="width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle>
+          </svg>
+        </div>
+      </div>
 
-        // Calling state variables
-        let peerConnection = null;
-        let localMediaStream = null;
-        let currentCallDocId = null;
-        let unsubscribeCurrentCall = null;
-        let incomingCallData = null;
-        let activeCallTimerInterval = null;
-        let callSeconds = 0;
-        let currentWebpayAction = null;
+      <!-- Segmented Tabs -->
+      <div style="display: flex; align-items: center; gap: 20px; padding: 4px 20px 18px 20px;">
+        <!-- Active Chats Tab Pill -->
+        <div style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #6c2cf5 0%, #9e34f6 100%); padding: 7px 18px; border-radius: 24px; box-shadow: 0 4px 15px rgba(132, 45, 245, 0.4); cursor: pointer;">
+          <span style="font-size: 14.5px; font-weight: 700; color: #ffffff;">Chats</span>
+          <span id="userCountBadge" style="background: rgba(220, 110, 255, 0.55); color: #ffffff; font-size: 11.5px; font-weight: 800; padding: 2px 7px; border-radius: 12px;">0</span>
+        </div>
+        <span style="color: #7b819f; font-size: 14.5px; font-weight: 500; cursor: pointer;">Groups</span>
+        <span style="color: #7b819f; font-size: 14.5px; font-weight: 500; cursor: pointer;">Business</span>
+      </div>
 
-        let mockCalls = [];
+      <!-- Scrollable Chat List -->
+      <div id="realUsersList" style="flex: 1; overflow-y: auto; padding: 4px 0; -webkit-overflow-scrolling: touch;">
+        <div style="text-align: center; color: #626786; font-size: 14px; margin-top: 40px;">Chats load ho rahi hain...</div>
+      </div>
 
-        // Number Standardizer Helper (+923XXXXXXXXX)
-        function normalizePhoneNumber(phone) {
-            if (!phone) return "";
-            let clean = phone.replace(/[^0-9]/g, '');
-            if (clean.startsWith("92")) {
-                return "+" + clean;
-            } else if (clean.startsWith("0")) {
-                return "+92" + clean.substring(1);
-            } else if (clean.length === 10) {
-                return "+92" + clean;
-            }
-            return "+" + clean;
-        }
+      <!-- Bottom Navigation Bar -->
+      <div style="display: flex; justify-content: space-around; align-items: center; padding: 10px 14px 18px 14px; background: #03040c; border-top: 1px solid #101224;">
+        
+        <!-- Active Tab: Chats -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative;">
+          <div style="width: 36px; height: 32px; background: rgba(142, 51, 246, 0.22); border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative;">
+            <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="#be6bf8" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <!-- Tiny Tab Badge -->
+            <span style="position: absolute; top: -4px; right: -5px; background: #e040fb; color: #fff; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 8px;">12</span>
+          </div>
+          <span style="font-size: 11px; font-weight: 600; color: #c951fa;">Chats</span>
+        </div>
 
-        // Screen Navigator
-        function goToScreen(screenNumber) {
-            wrapper.className = `screens-wrapper show-screen-${screenNumber}`;
-            if (screenNumber === 2) setTimeout(() => phoneInput.focus(), 450);
-            if (screenNumber === 4) setTimeout(() => fullNameInput.focus(), 450);
-            if (screenNumber === 6) {
-                updateUserPresence(true);
-                markIncomingMessagesAsDelivered();
-                homeMyStatusAvatar.src = avatarPreview.src;
-                document.getElementById('drawerMyAvatar').src = avatarPreview.src;
-                document.getElementById('statusMyAvatar').src = avatarPreview.src;
-                document.getElementById('settingsMyAvatar').src = avatarPreview.src;
-                document.getElementById('profileTabAvatar').src = avatarPreview.src;
+        <!-- Tab: Contacts -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="#686e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span style="font-size: 11px; font-weight: 500; color: #686e8e;">Contacts</span>
+        </div>
+
+        <!-- Tab: AI -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="#686e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v3m0 14v3M2 12h3m14 0h3"></path>
+          </svg>
+          <span style="font-size: 11px; font-weight: 500; color: #686e8e;">AI</span>
+        </div>
+
+        <!-- Tab: Business -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="#686e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <span style="font-size: 11px; font-weight: 500; color: #686e8e;">Business</span>
+        </div>
+
+        <!-- Tab: More -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;">
+          <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24" fill="none" stroke="#686e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle>
+          </svg>
+          <span style="font-size: 11px; font-weight: 500; color: #686e8e;">More</span>
+        </div>
+
+      </div>
+
+    </div>
+
+<!-- ============================================== -->
+    <!-- CHAT CONVERSATION SCREEN (SCREENSHOT INTERFACE)-->
+    <!-- ============================================== -->
+    <div id="chatConversationScreen" class="screen-content" style="display: none; background: #03040e; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 20; flex-direction: column;">
+      
+      <!-- Top App Bar -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 14px 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(3, 4, 14, 0.95); backdrop-filter: blur(10px);">
+        
+        <!-- Left: Back Button + Avatar + Name & Status -->
+        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+          <!-- Back Arrow -->
+          <div id="btnBackToDashboard" style="padding: 4px; display: flex; align-items: center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+          </div>
+          
+          <!-- Avatar + Status Dot -->
+          <div style="position: relative; width: 44px; height: 44px; flex-shrink: 0;">
+            <img id="activeChatAvatar" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            <div id="activeChatAvatarDot" style="display: none; position: absolute; bottom: 0px; right: 0px; width: 12px; height: 12px; background: #00e676; border-radius: 50%; border: 2.5px solid #03040e;"></div>
+          </div>
+
+          <!-- Name & Status -->
+          <div style="display: flex; flex-direction: column;">
+            <span id="activeChatName" style="font-size: 15.5px; font-weight: 700; color: #ffffff; line-height: 1.2;">Name</span>
+            <span id="activeChatStatus" style="font-size: 12px; color: #00e676; font-weight: 500;">Offline</span>
+          </div>
+        </div>
+
+        <!-- Right: Call, Video, 3-Dots -->
+        <div style="display: flex; align-items: center; gap: 16px; color: #ffffff;">
+          <svg style="width: 19px; height: 19px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <svg style="width: 20px; height: 20px; cursor: pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+          <svg style="width: 19px; height: 19px; cursor: pointer;" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="12" cy="19" r="2"></circle>
+          </svg>
+        </div>
+
+      </div>
+
+      <!-- Messages Body -->
+      <div id="conversationMessagesList" style="flex: 1; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column;">
+        <!-- "Today" Pill Badge -->
+        <div style="align-self: center; background: #121528; color: #8e94b2; font-size: 11.5px; font-weight: 600; padding: 5px 14px; border-radius: 12px; margin-bottom: 16px;">
+          Today
+        </div>
+      </div>
+
+      <!-- Bottom Chat Input Bar -->
+      <div style="padding: 10px 14px 16px 14px; background: #03040e; display: flex; align-items: center; gap: 8px;">
+        <!-- Input Box Container -->
+        <div style="flex: 1; display: flex; align-items: center; background: #0d1021; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; padding: 6px 14px; gap: 8px;">
+          <!-- Emoji Icon -->
+          <svg style="width: 20px; height: 20px; color: #727699; cursor: pointer; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line>
+          </svg>
+          <!-- Input -->
+          <input type="text" id="chatMessageInput" placeholder="Type a message..." style="flex: 1; background: transparent; border: none; outline: none; color: #ffffff; font-size: 14px; padding: 6px 0;">
+          <!-- Clip Icon -->
+          <svg style="width: 19px; height: 19px; color: #727699; cursor: pointer; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+          </svg>
+          <!-- Camera Icon -->
+          <svg style="width: 19px; height: 19px; color: #727699; cursor: pointer; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+
+        <!-- Voice / Send Button -->
+        <button id="btnSendOrMic" style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #7c2bf5 0%, #a435f5 100%); border: none; outline: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 4px 15px rgba(124, 43, 245, 0.4);">
+          <!-- Mic SVG by default -->
+          <svg id="iconMic" style="width: 20px; height: 20px; color: #ffffff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <!-- Send Arrow SVG (when text is typed) -->
+          <svg id="iconSend" style="width: 19px; height: 19px; color: #ffffff; display: none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+
+      </div>
+
+    </div>
+
+  </div> <!-- Yeh .app-screen ka closing div ab aakhir mein hai -->
+
+
+  <!-- Firebase SDKs (Web Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // ----------------------------------------------------
+    // Firebase Setup
+    // ----------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyBPJc5O2FiQadIOSd6s4o7Ox1fQz-MkVtw",
+      authDomain: "wepziapp.firebaseapp.com",
+      projectId: "wepziapp",
+      storageBucket: "wepziapp.firebasestorage.app",
+      messagingSenderId: "842699350752",
+      appId: "1:842699350752:web:81bb08b86f7175fa5da685",
+      measurementId: "G-PCX9CKTFM3"
+    };
+
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase Connected Successfully!");
+    } catch (e) {
+      console.log("Firebase init note:", e.message);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+let currentUserGlobal = null;
+let selectedImageFile = null;
+
+
+    // ----------------------------------------------------
+    // Canvas Particles Simulation
+    // ----------------------------------------------------
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+
+    function resizeCanvas() {
+      const parent = canvas.parentElement;
+      width = canvas.width = parent.clientWidth;
+      height = canvas.height = parent.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class StarParticle {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * width;
+        this.y = initial ? Math.random() * height : height + 10;
+        this.size = Math.random() * 1.6 + 0.5;
+        this.speedY = Math.random() * 0.35 + 0.15;
+        this.speedX = (Math.random() - 0.5) * 0.15;
+        this.alpha = Math.random() * 0.6 + 0.2;
+        this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+        this.twinkleFactor = Math.random() * Math.PI;
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x -= this.speedX;
+        this.twinkleFactor += this.twinkleSpeed;
+        if (this.y < -10) this.reset();
+      }
+      draw() {
+        const currentAlpha = Math.max(0.1, this.alpha + Math.sin(this.twinkleFactor) * 0.25);
+        ctx.fillStyle = `rgba(180, 215, 255, ${currentAlpha})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 40; i++) particles.push(new StarParticle());
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      for (let p of particles) {
+        p.update();
+        p.draw();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // ----------------------------------------------------
+    // Screen Toggle Logic
+    // ----------------------------------------------------
+    const mainScreen = document.getElementById('mainScreen');
+    const signupScreen = document.getElementById('signupScreen');
+    
+    // Switch to Sign Up screen
+    document.getElementById('btnGetStarted').addEventListener('click', () => {
+      mainScreen.style.display = 'none';
+      signupScreen.style.display = 'flex';
+    });
+
+    // Go back to Main screen
+    document.getElementById('btnBack').addEventListener('click', () => {
+      signupScreen.style.display = 'none';
+      mainScreen.style.display = 'flex';
+    });
+
+    document.getElementById('btnRegister').addEventListener('click', async () => {
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+
+  if (!username || !email || !password) {
+    alert("Please fill all the fields!");
+    return;
+  }
+
+  const btn = document.getElementById('btnRegister');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>Creating...</span>';
+  
+  try {
+    // 1. Firebase Authentication Create User
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    // 2. Save Data to Firestore (Database) - (Yahan uid bhi add kar diya hai)
+    await db.collection("users").doc(user.uid).set({
+      uid: user.uid, // YE LINE ADD KI HAI (Zaroori hai)
+      username: username,
+      email: email,
+      password: password, 
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // 3. Current user global variable me save karo
+    currentUserGlobal = user;
+    
+    // 4. Form Clear karein
+    document.getElementById('regUsername').value = '';
+    document.getElementById('regEmail').value = '';
+    document.getElementById('regPassword').value = '';
+
+    // 5. Sign up screen hide karo aur Profile Upload screen dikhao
+    document.getElementById('signupScreen').style.display = 'none';
+    document.getElementById('profileUploadScreen').style.display = 'flex'; 
+    // (Purana mainScreen pe wapas bhejne wala code maine yahan se delete kar diya hai)
+
+  } catch (error) {
+    console.error("Error signing up:", error);
+    alert(error.message);
+  } finally {
+    btn.innerHTML = originalText;
+  }
+});
+
+    // ----------------------------------------------------
+    // LOGIN SCREEN LOGIC & FORGET PASSWORD
+    // ----------------------------------------------------
+    const loginScreen = document.getElementById('loginScreen');
+
+    // Main screen se Login Screen par jane ke liye
+    document.getElementById('btnLogin').addEventListener('click', () => {
+      mainScreen.style.display = 'none';
+      loginScreen.style.display = 'flex';
+    });
+
+    // Login screen se wapas Main Screen par aane ke liye
+    document.getElementById('btnBackFromLogin').addEventListener('click', () => {
+      loginScreen.style.display = 'none';
+      mainScreen.style.display = 'flex';
+    });
+
+    // Jab user "Login" button press kare
+    document.getElementById('btnSubmitLogin').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!email || !password) {
+        alert("Please enter both email and password!");
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitLogin');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>Logging in...</span>';
+      
+      try {
+        // Firebase se user ko login karwana
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        
+        // Global variable main user save karna
+        currentUserGlobal = userCredential.user;
+        
+        // Input fields saaf karna
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+
+        // Login screen hide kar ke Chat Dashboard show karna
+        loginScreen.style.display = 'none';
+        document.getElementById('chatDashboardScreen').style.display = 'flex';
+        
+        // Asali users ko dashboard pe load karna
+        fetchRealUsers();
+
+      } catch (error) {
+        console.error("Error logging in:", error);
+        alert("Login Failed: " + error.message);
+      } finally {
+        btn.innerHTML = originalText;
+      }
+    });
+
+    // Forget Password Logic
+    document.getElementById('forgotPasswordBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      
+      if (!email) {
+        alert("Please enter your email address in the input box first, then click 'Forgot Password?'.");
+        return;
+      }
+
+      try {
+        // Firebase ke zariye reset password ki email bhejna
+        await auth.sendPasswordResetEmail(email);
+        alert("Password reset link has been sent to your email. Please check your inbox!");
+      } catch (error) {
+        console.error("Error resetting password:", error);
+        alert("Error: " + error.message);
+      }
+    });
+
+    function selectFeature(name) {
+      console.log(name + ' clicked');
+    }
+
+
+const fileInput = document.getElementById('fileInput');
+const previewImage = document.getElementById('previewImage');
+const cameraIcon = document.getElementById('cameraIcon');
+const btnUploadComplete = document.getElementById('btnUploadComplete');
+let base64String = ""; // Naya variable image ka text save karne ke liye
+
+// Jab user photo select kare
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      base64String = e.target.result; // Image text me convert ho gayi
+      previewImage.src = base64String;
+      previewImage.style.display = 'block';
+      cameraIcon.style.display = 'none';
+      btnUploadComplete.style.display = 'block'; // Button dikhao
+    }
+    reader.readAsDataURL(file); // Convert image to Base64 string
+  }
+});
+
+// Jab "Complete Setup" pe click kare
+btnUploadComplete.addEventListener('click', async () => {
+  if(!base64String || !currentUserGlobal) return;
+  btnUploadComplete.innerText = 'Saving...';
+  
+  try {
+    // Firebase Storage ki jagah Direct Firestore (Database) me text save kar diya
+    await db.collection("users").doc(currentUserGlobal.uid).update({
+      profilePic: base64String
+    });
+
+    // Profile save ho gayi! Ab Dashboard dikhao
+    document.getElementById('profileUploadScreen').style.display = 'none';
+    document.getElementById('chatDashboardScreen').style.display = 'flex';
+    
+    // Baqi dosto ko fetch karne wala function chalao
+    fetchRealUsers();
+
+  } catch (error) {
+    console.log(error);
+    alert("Error saving profile: " + error.message);
+    btnUploadComplete.innerText = 'Complete Setup';
+  }
+});
+
+// ========================================================
+// NOTIFICATION DIKHANE KA FUNCTION
+// ========================================================
+let notifTimeout;
+function showNotification(name, text, avatarUrl, targetUid) {
+  const toast = document.getElementById('notificationToast');
+  
+  document.getElementById('notifName').innerText = name;
+  document.getElementById('notifText').innerText = text;
+  document.getElementById('notifAvatar').src = avatarUrl;
+
+  // Upar se slide ho kar aayega
+  toast.style.top = '20px';
+
+  // Notification par click karne se uski chat khul jaye
+  toast.onclick = () => {
+    toast.style.top = '-100px'; // Click karte hi notification hatao
+    openChat(name, avatarUrl, null, targetUid); // Chat open kardo
+  };
+
+  // 3.5 second baad khud ba khud upar wapas chala jaye
+  clearTimeout(notifTimeout);
+  notifTimeout = setTimeout(() => {
+    toast.style.top = '-100px';
+  }, 3500);
+}
+
+// ========================================================
+// FETCH USERS & LIVE NOTIFICATION LISTENER
+// ========================================================
+async function fetchRealUsers() {
+  const usersListDiv = document.getElementById('realUsersList');
+  usersListDiv.innerHTML = ''; 
+
+  try {
+    const snapshot = await db.collection('users').get();
+    let userCount = 0;
+
+    snapshot.forEach((doc) => {
+      const userData = doc.data();
+      
+      // Khud apna user chat list me show nahi karna
+      if (currentUserGlobal && userData.uid === currentUserGlobal.uid) return;
+
+      const idx = userCount;
+      userCount++;
+
+      const avatarUrl = userData.profilePic 
+        ? userData.profilePic 
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.username || 'User')}&background=1d1b38&color=ffffff&rounded=true&bold=true`;
+
+      // Ek unique div ID banayenge taa k iska last message live update ho sakay
+      const userRowId = `chat-row-${userData.uid}`;
+
+      const chatHTML = `
+        <div id="${userRowId}" onclick="openChat(this.getAttribute('data-name'), this.getAttribute('data-avatar'), this, '${userData.uid}')" data-name="${userData.username || 'User'}" data-avatar="${avatarUrl}" style="display: flex; align-items: center; padding: 11px 20px; cursor: pointer; transition: background 0.15s ease;" onmouseover="this.style.background='rgba(255,255,255,0.03)'" onmouseout="this.style.background='transparent'">
+          
+          <div style="width: 50px; height: 50px; border-radius: 50%; margin-right: 14px; position: relative; flex-shrink: 0;">
+            <img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            <div style="position: absolute; bottom: 1px; right: 1px; width: 12px; height: 12px; background: #00e676; border-radius: 50%; border: 2.2px solid #03040e;"></div>
+          </div>
+
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+              <span style="font-size: 15px; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${userData.username || 'User'}</span>
+              <span id="time-${userData.uid}" style="font-size: 11px; color: #787d99; font-weight: 500;">...</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="lastMsg-${userData.uid}" style="font-size: 13px; color: #8e94b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">Say Hi! 👋</span>
+              <span id="badge-${userData.uid}" style="display: none; background: #00c853; color: #ffffff; font-size: 11px; font-weight: 700; width: 19px; height: 19px; border-radius: 50%; align-items: center; justify-content: center;">1</span>
+            </div>
+          </div>
+        </div>
+      `;
+      usersListDiv.innerHTML += chatHTML;
+
+      // ========================================================
+      // LIVE LISTENER FOR EACH USER (For Last Message & Notifications)
+      // ========================================================
+      const chatId = currentUserGlobal.uid < userData.uid 
+          ? currentUserGlobal.uid + '_' + userData.uid 
+          : userData.uid + '_' + currentUserGlobal.uid;
+
+      let isInitialLoad = true; // App khulte hi purane msgs ki notification na aaye is liye
+      
+      db.collection('chats').doc(chatId).collection('messages')
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .onSnapshot((msgSnapshot) => {
+          msgSnapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+              const msgData = change.doc.data();
+              
+              // 1. Dashboard par "Last Message" aur "Time" update karna
+              const msgText = msgData.type === 'voice' ? '🎤 Voice Message' : msgData.text;
+              document.getElementById(`lastMsg-${userData.uid}`).innerText = msgText;
+              
+              if(msgData.timestamp) {
+                  const timeStr = msgData.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  document.getElementById(`time-${userData.uid}`).innerText = timeStr;
+              }
+
+              // 2. Agar message samne wale ne bheja hai aur abhi uski chat khuli hui NAHI hai
+              if (msgData.senderId === userData.uid && activeChatUserId !== userData.uid) {
                 
-                const curName = fullNameInput.value || "Ali Raza";
-                document.getElementById('drawerMyName').innerText = curName;
-                document.getElementById('settingsMyName').innerText = curName;
-                document.getElementById('profileTabName').innerText = curName;
-                document.getElementById('profileEditName').innerText = curName;
+                // Dashboard par Green Unread Badge show karna
+                const badge = document.getElementById(`badge-${userData.uid}`);
+                badge.style.display = 'flex';
 
-                const curId = wepziIdDisplay.innerText || "aliraza_786";
-                document.getElementById('drawerMyId').innerText = "@" + curId;
-                document.getElementById('settingsMyId').innerText = "@" + curId;
-                document.getElementById('profileTabId').innerText = "@" + curId;
-
-                syncWebpayUI();
-                listenToMyChats();
-                renderCallsList();
-                listenForIncomingCalls();
-                updateSettingsUI(); 
-            }
-        }
-
-        // ================= SCREEN 2: SEND SMS OTP =================
-        async function handleSendOTP() {
-            let rawPhone = phoneInput.value.trim();
-            if (rawPhone.startsWith("0")) rawPhone = rawPhone.substring(1); 
-
-            if (rawPhone.length < 9) {
-                alert("Barah-e-karam sahi phone number enter karein (e.g. 3001234567)");
-                return;
-            }
-
-            const formattedPhoneNumber = normalizePhoneNumber(rawPhone);
-            displayUserPhone.innerText = formattedPhoneNumber;
-
-            const sendBtn = document.getElementById('sendOtpBtn');
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = 'Sending SMS... <i class="fa-solid fa-spinner fa-spin"></i>';
-
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            isExpired = false;
-
-            try {
-                const response = await fetch('https://api.textbee.dev/api/v1/gateway/send-sms', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': textbeeConfig.apiKey
-                    },
-                    body: JSON.stringify({
-                        recipients: [formattedPhoneNumber],
-                        message: `Wepzi OTP: Your verification code is ${generatedOTP}. Valid for 45 seconds.`
-                    })
-                });
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error || `HTTP status: ${response.status}`);
+                // Agar app pehli baar load nahi ho rahi, tou Upar Notification Popup dikhana
+                if (!isInitialLoad) {
+                  showNotification(userData.username, msgText, avatarUrl, userData.uid);
                 }
-                
-                goToScreen(3);
-                startTimer(45);
-                setTimeout(() => {
-                    clearOtpInputs();
-                    otpInputs[0].focus();
-                }, 450);
-
-            } catch (error) {
-                console.warn("SMS Gateway Note:", error.message);
-                alert(`[Wepzi OTP]: Your verification code is ${generatedOTP}`);
-                goToScreen(3);
-                startTimer(45);
-                setTimeout(() => {
-                    clearOtpInputs();
-                    otpInputs[0].focus();
-                }, 450);
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
+              }
             }
-        }
-
-        // ================= SCREEN 3: VERIFY OTP =================
-        async function handleVerifyOTP() {
-            let enteredCode = "";
-            otpInputs.forEach(input => enteredCode += input.value);
-
-            if (enteredCode.length < 6) {
-                alert("Barah-e-karam 6-digit SMS code enter karein.");
-                return;
-            }
-
-            const verifyBtn = document.getElementById('verifyOtpBtn');
-            verifyBtn.disabled = true;
-            verifyBtn.innerHTML = 'Verifying... <i class="fa-solid fa-spinner fa-spin"></i>';
-
-            try {
-                if (isExpired) {
-                    alert("Code expired ho gaya hai! 'Resend SMS' par click karein.");
-                    return;
-                }
-
-                if (generatedOTP && enteredCode === generatedOTP) {
-                    clearInterval(countdownTimer);
-                    
-                    const formattedPhoneNumber = normalizePhoneNumber(phoneInput.value.trim());
-
-                    if (window.firebase && firebase.apps.length > 0) {
-                        try {
-                            const db = firebase.firestore();
-                            const userDoc = await db.collection("users").doc(formattedPhoneNumber).get();
-
-                            if (userDoc.exists) {
-                                const existingData = userDoc.data();
-                                
-                                const userSession = {
-                                    name: existingData.name,
-                                    wepziId: existingData.wepziId,
-                                    avatar: existingData.avatar,
-                                    phone: existingData.phoneNumber,
-                                    webpay: existingData.webpay || {
-                                        accountId: "WP-" + formattedPhoneNumber.replace("+92",""),
-                                        linkedNumber: existingData.phoneNumber,
-                                        status: "Active",
-                                        balance: 0.00
-                                    },
-                                    isLoggedIn: true
-                                };
-
-                                localStorage.setItem('wepzi_user_session', JSON.stringify(userSession));
-                                localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
-
-                                fullNameInput.value = existingData.name;
-                                wepziIdDisplay.innerText = existingData.wepziId;
-                                avatarPreview.src = existingData.avatar || avatarPreview.src;
-
-                                alert(`Welcome Back, ${existingData.name}!`);
-                                goToScreen(6);
-                                return;
-                            }
-                        } catch (err) {
-                            console.warn("Firestore check fallback:", err.message);
-                        }
-                    }
-
-                    goToScreen(4); 
-                } else {
-                    alert("Galat verification code! Dobara check karein.");
-                }
-            } catch (error) {
-                alert("Verification fail: " + error.message);
-            } finally {
-                verifyBtn.disabled = false;
-                verifyBtn.innerHTML = 'Verify & Login';
-            }
-        }
-
-        function startTimer(seconds) {
-            clearInterval(countdownTimer);
-            timeLeft = seconds;
-            updateTimerDisplay();
-
-            countdownTimer = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(countdownTimer);
-                    isExpired = true;
-                    resendBox.innerHTML = `Code nahi mila? <span class="resend-btn-active" onclick="handleSendOTP()">Resend SMS</span>`;
-                    expiredError.style.display = 'block';
-                }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            let s = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
-            resendBox.innerHTML = `Resend code in <span class="timer">00:${s}</span>`;
-        }
-
-        function clearOtpInputs() {
-            otpInputs.forEach(input => input.value = '');
-        }
-
-        function handleOtpInput(input, index) {
-            input.value = input.value.replace(/[^0-9]/g, '');
-            if (input.value && index < otpInputs.length - 1) {
-                otpInputs[index + 1].focus();
-            }
-        }
-
-        function handleOtpBackspace(event, index) {
-            if (event.key === "Backspace" && !event.target.value && index > 0) {
-                otpInputs[index - 1].focus();
-            }
-        }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => avatarPreview.src = e.target.result;
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function autoGenerateWepziId(name) {
-            const cleaned = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-            wepziIdDisplay.innerText = cleaned ? cleaned + "_786" : "username_786";
-        }
-
-        // ================= SCREEN 4: PROFILE SAVE =================
-        async function handleProfileContinue() {
-            const name = fullNameInput.value.trim();
-            if (!name) {
-                alert("Barah-e-karam apna Full Name enter karein!");
-                fullNameInput.focus();
-                return;
-            }
-
-            const formattedPhoneNumber = normalizePhoneNumber(phoneInput.value.trim());
-            const wepziId = wepziIdDisplay.innerText;
-            const avatarUrl = avatarPreview.src;
-
-            const webpayAccount = {
-                accountId: "WP-" + formattedPhoneNumber.replace("+92",""),
-                linkedNumber: formattedPhoneNumber,
-                status: "Active",
-                balance: 0.00,
-                currency: "PKR",
-                createdAt: new Date().toISOString()
-            };
-
-            const userSession = {
-                name: name,
-                wepziId: wepziId,
-                avatar: avatarUrl,
-                phone: formattedPhoneNumber,
-                webpay: webpayAccount,
-                isLoggedIn: true
-            };
-
-            localStorage.setItem('wepzi_user_session', JSON.stringify(userSession));
-            localStorage.setItem('wepzi_logged_in_phone', formattedPhoneNumber);
-
-            if (window.firebase && firebase.apps.length > 0) {
-                try {
-                    const db = firebase.firestore();
-                    await db.collection("users").doc(formattedPhoneNumber).set({
-                        name: name,
-                        wepziId: wepziId,
-                        avatar: avatarUrl,
-                        phoneNumber: formattedPhoneNumber,
-                        isOnline: true,
-                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                        webpay: webpayAccount,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.warn("Firestore user sync note:", error.message);
-                }
-            }
-
-            goToScreen(5);
-        }
-
-        function togglePermission(cardElement) {
-            cardElement.querySelector('.perm-check-badge').classList.toggle('unchecked');
-        }
-
-        function handlePermissionsContinue() {
-            goToScreen(6);
-        }
-
-        // ================= SCREEN 6: REAL-TIME CHATS =================
-        function listenToMyChats() {
-            const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawMyPhone || !window.firebase || firebase.apps.length === 0) return;
-
-            const myPhone = normalizePhoneNumber(rawMyPhone);
-            const db = firebase.firestore();
-
-            if (unsubscribeChatsList) unsubscribeChatsList();
-
-            unsubscribeChatsList = db.collection("chats")
-                .where("participants", "array-contains", myPhone)
-                .onSnapshot((snapshot) => {
-                    if (snapshot.empty) {
-                        chatListContainer.innerHTML = '';
-                        chatListContainer.appendChild(emptyChatState);
-                        emptyChatState.style.display = 'flex';
-                        return;
-                    }
-
-                    chatListContainer.innerHTML = '';
-                    emptyChatState.style.display = 'none';
-
-                    snapshot.forEach((doc) => {
-                        const chatData = doc.data();
-                        const otherPhone = chatData.participants.find(p => p !== myPhone);
-                        const otherDetails = (chatData.participantDetails && chatData.participantDetails[otherPhone]) 
-                            ? chatData.participantDetails[otherPhone] 
-                            : { name: otherPhone, avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(otherPhone)}&background=8b5cf6&color=fff` };
-
-                        const row = document.createElement('div');
-                        row.className = 'chat-row-item';
-                        row.onclick = () => openChatWindow(chatData.chatId, otherDetails.name, otherDetails.avatar, otherPhone);
-
-                        const timeFormatted = chatData.lastUpdated && chatData.lastUpdated.toDate 
-                            ? new Date(chatData.lastUpdated.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                            : 'Now';
-
-                        row.innerHTML = `
-                            <img src="${otherDetails.avatar}" class="chat-row-avatar" alt="${otherDetails.name}">
-                            <div class="chat-row-details">
-                                <div class="chat-row-header">
-                                    <span class="chat-row-name">${otherDetails.name}</span>
-                                    <span class="chat-row-time">${timeFormatted}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="chat-row-msg">${chatData.lastMsg || 'No messages yet'}</span>
-                                </div>
-                            </div>
-                        `;
-                        chatListContainer.appendChild(row);
-                    });
-                }, (error) => {
-                    console.error("Live chats listener error:", error);
-                });
-        }
-
-        function openChatWindow(chatId, name, avatar, partnerPhone) {
-            currentActiveChatId = chatId;
-            currentChatPartnerPhone = normalizePhoneNumber(partnerPhone);
-            currentChatPartnerName = name;
-            currentChatPartnerAvatar = avatar;
-            
-            document.getElementById('chatWinName').innerText = name;
-            document.getElementById('chatWinAvatar').src = avatar;
-            const statusEl = document.getElementById('chatWinStatus');
-            chatWindow.classList.add('open');
-
-            const db = firebase.firestore();
-            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-
-            let partnerIsOnline = false;
-            let partnerLastSeen = null;
-
-            if (unsubscribePartnerPresence) unsubscribePartnerPresence();
-            unsubscribePartnerPresence = db.collection("users").doc(currentChatPartnerPhone)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        partnerIsOnline = data.isOnline === true;
-                        partnerLastSeen = data.lastSeen;
-                        
-                        if (!statusEl.classList.contains('status-typing-text')) {
-                            if (partnerIsOnline) {
-                                statusEl.innerText = "online";
-                                statusEl.className = "status-online-text";
-                            } else {
-                                statusEl.innerText = formatLastSeen(partnerLastSeen);
-                                statusEl.className = "status-offline-text";
-                            }
-                        }
-                    } else {
-                        statusEl.innerText = "offline";
-                        statusEl.className = "status-offline-text";
-                    }
-                });
-
-            if (unsubscribeChatDoc) unsubscribeChatDoc();
-            unsubscribeChatDoc = db.collection("chats").doc(chatId)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const chatData = doc.data();
-                        const isPartnerTyping = chatData.typing && chatData.typing[currentChatPartnerPhone] === true;
-
-                        if (isPartnerTyping) {
-                            statusEl.innerText = "typing...";
-                            statusEl.className = "status-typing-text";
-                        } else {
-                            if (partnerIsOnline) {
-                                statusEl.innerText = "online";
-                                statusEl.className = "status-online-text";
-                            } else {
-                                statusEl.innerText = formatLastSeen(partnerLastSeen);
-                                statusEl.className = "status-offline-text";
-                            }
-                        }
-                    }
-                });
-
-            markMessagesAsRead(chatId, currentChatPartnerPhone);
-
-            if (unsubscribeMessages) unsubscribeMessages();
-
-            unsubscribeMessages = db.collection("chats").doc(chatId).collection("messages")
-                .orderBy("timestamp", "asc")
-                .onSnapshot((snapshot) => {
-                    chatMessagesFeed.innerHTML = '';
-                    
-                    if (snapshot.empty) {
-                        chatMessagesFeed.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 20px;">No messages yet. Say hello!</div>';
-                        return;
-                    }
-
-                    snapshot.forEach((doc) => {
-                        const msg = doc.data();
-                        const isMe = msg.sender === myPhone;
-                        const bubble = document.createElement('div');
-                        bubble.className = `msg-bubble ${isMe ? 'msg-sent' : 'msg-received'}`;
-
-                        const timeString = msg.timestamp && msg.timestamp.toDate 
-                            ? new Date(msg.timestamp.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-                            : 'Just now';
-
-                        bubble.innerHTML = `
-                            <span>${msg.text}</span>
-                            <span class="msg-meta">
-                                <span>${timeString}</span>
-                                ${getTickHtml(msg, isMe)}
-                            </span>
-                        `;
-                        chatMessagesFeed.appendChild(bubble);
-                    });
-
-                    chatMessagesFeed.scrollTop = chatMessagesFeed.scrollHeight;
-                    markMessagesAsRead(chatId, currentChatPartnerPhone);
-                });
-        }
-
-        function closeChatWindow() {
-            if (currentActiveChatId) {
-                const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-                if (myPhone && window.firebase && firebase.apps.length > 0) {
-                    firebase.firestore().collection("chats").doc(currentActiveChatId).set({
-                        typing: { [myPhone]: false }
-                    }, { merge: true }).catch(() => {});
-                }
-            }
-
-            chatWindow.classList.remove('open');
-            currentActiveChatId = null;
-            currentChatPartnerPhone = null;
-            if (unsubscribeMessages) unsubscribeMessages();
-            if (unsubscribePartnerPresence) unsubscribePartnerPresence();
-            if (unsubscribeChatDoc) unsubscribeChatDoc();
-        }
-
-        async function sendChatMessage() {
-            const inputVal = chatMessageInput.value.trim();
-            if (!inputVal || !currentActiveChatId) return;
-
-            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-            const db = firebase.firestore();
-
-            chatMessageInput.value = '';
-
-            db.collection("chats").doc(currentActiveChatId).set({
-                typing: { [myPhone]: false }
-            }, { merge: true });
-
-            try {
-                await db.collection("chats").doc(currentActiveChatId).collection("messages").add({
-                    sender: myPhone,
-                    receiver: currentChatPartnerPhone,
-                    text: inputVal,
-                    status: 'sent',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                await db.collection("chats").doc(currentActiveChatId).update({
-                    lastMsg: inputVal,
-                    lastSender: myPhone,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-            } catch (error) {
-                console.error("Message send fail:", error);
-                alert("Message deliver nahi ho saka: " + error.message);
-            }
-        }
-
-        function handleInputKeyPress(event) {
-            if (event.key === "Enter") {
-                sendChatMessage();
-            }
-        }
-
-        // ================= CONTACT LOOKUP & VALIDATION =================
-        function openAddModal() {
-            plusDropdown.classList.remove('show');
-            addContactModal.classList.add('show');
-            document.getElementById('newContactPhone').focus();
-        }
-
-        function closeAddModal() {
-            addContactModal.classList.remove('show');
-            document.getElementById('newContactPhone').value = '';
-            document.getElementById('newContactMsg').value = '';
-        }
-
-        async function saveNewContact() {
-            const rawPhone = document.getElementById('newContactPhone').value.trim();
-            const contactPhone = normalizePhoneNumber(rawPhone);
-            const firstMsg = document.getElementById('newContactMsg').value.trim() || "Assalam-o-Alaikum!";
-            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-
-            if (!rawPhone) {
-                alert("Barah-e-karam phone number enter karein!");
-                return;
-            }
-
-            if (contactPhone === myPhone) {
-                alert("Aap apne hi number par chat shuru nahi kar sakte!");
-                return;
-            }
-
-            const btnSave = document.getElementById('btnSaveNewContact');
-            btnSave.disabled = true;
-            btnSave.innerHTML = 'Checking... <i class="fa-solid fa-spinner fa-spin"></i>';
-
-            const db = firebase.firestore();
-
-            try {
-                const userDoc = await db.collection("users").doc(contactPhone).get();
-
-                if (!userDoc.exists) {
-                    alert("❌ Yeh number Wepzi par registered nahi hai!\nSirf active Wepzi users ke sath chat shuru ki ja sakti hai.");
-                    return;
-                }
-
-                const recipientData = userDoc.data();
-                const recipientName = recipientData.name || "User";
-                const recipientAvatar = recipientData.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(recipientName)}&background=8b5cf6&color=fff`;
-
-                const myName = fullNameInput.value || "Me";
-                const myAvatar = avatarPreview.src;
-
-                const chatId = [myPhone, contactPhone].sort().join('_');
-
-                await db.collection("users").doc(myPhone).collection("saved_contacts").doc(contactPhone).set({
-                    phone: contactPhone,
-                    name: recipientName,
-                    avatar: recipientAvatar,
-                    savedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-
-                await db.collection("chats").doc(chatId).set({
-                    chatId: chatId,
-                    participants: [myPhone, contactPhone],
-                    participantDetails: {
-                        [myPhone]: { name: myName, avatar: myAvatar },
-                        [contactPhone]: { name: recipientName, avatar: recipientAvatar }
-                    },
-                    lastMsg: firstMsg,
-                    lastSender: myPhone,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-
-                await db.collection("chats").doc(chatId).collection("messages").add({
-                    sender: myPhone,
-                    receiver: contactPhone,
-                    text: firstMsg,
-                    status: 'sent',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                closeAddModal();
-                openChatWindow(chatId, recipientName, recipientAvatar, contactPhone);
-
-            } catch (error) {
-                console.error("Contact add fail:", error);
-                alert("Masla pesh aya: " + error.message);
-            } finally {
-                btnSave.disabled = false;
-                btnSave.innerHTML = 'Start Chat';
-            }
-        }
-
-        // ================= WEBPAY ACTIONS =================
-        function syncWebpayUI() {
-            const savedSession = localStorage.getItem('wepzi_user_session');
-            if (savedSession) {
-                const user = JSON.parse(savedSession);
-                const userPhone = user.phone || normalizePhoneNumber(phoneInput.value);
-                const rawNo = userPhone.replace("+92", "");
-
-                if (document.getElementById('webpayLinkedNumber')) {
-                    document.getElementById('webpayLinkedNumber').innerText = userPhone;
-                    document.getElementById('webpayAccountId').innerText = (user.webpay && user.webpay.accountId) ? user.webpay.accountId : ("WP-" + rawNo);
-                    const balanceVal = (user.webpay && user.webpay.balance !== undefined) ? user.webpay.balance : 0;
-                    document.getElementById('webpayBalance').innerText = `Rs. ${balanceVal.toFixed(2)} PKR`;
-                }
-            }
-        }
-
-        function openWebpayActionModal(actionType) {
-            currentWebpayAction = actionType;
-            document.getElementById('webpayActionTitle').innerText = actionType === 'topup' ? 'Top Up Webpay Balance' : 'Send Webpay Money';
-            document.getElementById('webpayAmountInput').value = '';
-            document.getElementById('webpayActionModal').classList.add('show');
-            document.getElementById('webpayAmountInput').focus();
-        }
-
-        function closeWebpayActionModal() {
-            document.getElementById('webpayActionModal').classList.remove('show');
-            currentWebpayAction = null;
-        }
-
-        async function processWebpayAction() {
-            const amount = parseFloat(document.getElementById('webpayAmountInput').value);
-            if (!amount || amount <= 0) {
-                alert("Barah-e-karam durust raqam (amount) enter karein!");
-                return;
-            }
-
-            const savedSession = localStorage.getItem('wepzi_user_session');
-            if (savedSession) {
-                const user = JSON.parse(savedSession);
-                if (!user.webpay) user.webpay = { balance: 0, accountId: "WP-" + user.phone.replace("+92","") };
-
-                if (currentWebpayAction === 'send' && user.webpay.balance < amount) {
-                    alert("Aapke Webpay wallet mein kafi balance nahi hai!");
-                    return;
-                }
-
-                if (currentWebpayAction === 'topup') {
-                    user.webpay.balance += amount;
-                    alert(`✅ Rs. ${amount.toFixed(2)} successfully aapke Webpay wallet mein add ho gaye!`);
-                } else {
-                    user.webpay.balance -= amount;
-                    alert(`✅ Rs. ${amount.toFixed(2)} transfer ho gaye!`);
-                }
-
-                localStorage.setItem('wepzi_user_session', JSON.stringify(user));
-                syncWebpayUI();
-
-                if (window.firebase && firebase.apps.length > 0) {
-                    const db = firebase.firestore();
-                    db.collection("users").doc(user.phone).update({ webpay: user.webpay }).catch(err => console.log(err));
-                }
-            }
-
-            closeWebpayActionModal();
-        }
-
-        // ================= ROBUST CALLING & AUDIO ENGINE =================
-        function listenForIncomingCalls() {
-            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-
-            const myPhone = normalizePhoneNumber(rawPhone);
-            const db = firebase.firestore();
-
-            console.log("Listening for incoming calls on:", myPhone);
-
-            db.collection("calls")
-                .where("receiver", "==", myPhone)
-                .where("status", "==", "ringing")
-                .onSnapshot((snapshot) => {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            incomingCallData = change.doc.data();
-                            incomingCallData.id = change.doc.id;
-                            
-                            document.getElementById('incomingName').innerText = incomingCallData.callerName || "Wepzi User";
-                            document.getElementById('incomingAvatar').src = incomingCallData.callerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-                            document.getElementById('incomingType').innerText = `Incoming ${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call...`;
-                            document.getElementById('incomingCallModal').classList.add('show');
-
-                            // Ringtone Setting Check
-                            if (appSettings.ringtone && ringtoneAudio) {
-                                ringtoneAudio.currentTime = 0;
-                                ringtoneAudio.play().catch(e => console.log("Audio autoplay note:", e));
-                            }
-
-                            // Vibrate Setting Check
-                            if (appSettings.vibrate && 'vibrate' in navigator) {
-                                navigator.vibrate([600, 400, 600, 400, 600]);
-                            }
-                        }
-                    });
-                }, (error) => {
-                    console.error("Call listener error:", error);
-                });
-        }
-
-        async function startCall(type) {
-            const rawPartner = currentChatPartnerPhone;
-            const rawMyPhone = localStorage.getItem('wepzi_logged_in_phone');
-
-            const partnerPhone = normalizePhoneNumber(rawPartner);
-            const myPhone = normalizePhoneNumber(rawMyPhone);
-            const myName = fullNameInput.value || "Me";
-            const myAvatar = avatarPreview.src;
-
-            if (!partnerPhone || !myPhone) {
-                alert("Pehle contact open karein!");
-                return;
-            }
-
-            // 1. Smart Permission Request
-            localMediaStream = await getMediaStreamWithPermission(type === 'video');
-            if (!localMediaStream) return;
-
-            // Caller UI Setup
-            document.getElementById('callName').innerText = currentChatPartnerName || "Contact";
-            document.getElementById('callAvatar').src = currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
-            document.getElementById('callStatusText').innerText = "Ringing...";
-            document.getElementById('callTimer').innerText = "00:00";
-            document.getElementById('callModal').classList.add('show');
-
-            if (dialtoneAudio) {
-                dialtoneAudio.currentTime = 0;
-                dialtoneAudio.play().catch(() => {});
-            }
-
-            try {
-                peerConnection = new RTCPeerConnection(rtcServers);
-
-                localMediaStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localMediaStream);
-                });
-
-                peerConnection.ontrack = (event) => {
-                    if (remoteAudioStream) {
-                        remoteAudioStream.srcObject = event.streams[0];
-                        remoteAudioStream.play().catch(() => {});
-                    }
-                };
-
-                const db = firebase.firestore();
-                const callDoc = db.collection("calls").doc();
-                currentCallDocId = callDoc.id;
-
-                const offerCandidates = callDoc.collection("offerCandidates");
-                const answerCandidates = callDoc.collection("answerCandidates");
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        offerCandidates.add(event.candidate.toJSON());
-                    }
-                };
-
-                const offerDescription = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offerDescription);
-
-                await callDoc.set({
-                    caller: myPhone,
-                    callerName: myName,
-                    callerAvatar: myAvatar,
-                    receiver: partnerPhone,
-                    type: type,
-                    status: "ringing",
-                    offer: { sdp: offerDescription.sdp, type: offerDescription.type },
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                unsubscribeCurrentCall = callDoc.onSnapshot(async (snapshot) => {
-                    const data = snapshot.data();
-                    if (!data) return;
-
-                    if (data.status === "connected" && !peerConnection.currentRemoteDescription && data.answer) {
-                        if (dialtoneAudio) dialtoneAudio.pause();
-                        document.getElementById('callStatusText').innerText = `${type === 'video' ? 'Video' : 'Voice'} Call Connected`;
-                        
-                        const answerDescription = new RTCSessionDescription(data.answer);
-                        await peerConnection.setRemoteDescription(answerDescription);
-
-                        requestWakeLock();
-                        startCallDurationTimer();
-                    }
-
-                    if (data.status === "declined" || data.status === "ended") {
-                        endCallUI();
-                    }
-                });
-
-                answerCandidates.onSnapshot((snapshot) => {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            const candidate = new RTCIceCandidate(change.doc.data());
-                            peerConnection.addIceCandidate(candidate).catch(() => {});
-                        }
-                    });
-                });
-
-                mockCalls.unshift({
-                    name: currentChatPartnerName || "Contact",
-                    type: "outgoing",
-                    status: `${type === 'video' ? 'Video' : 'Voice'} Call`,
-                    time: "Just now",
-                    avatar: currentChatPartnerAvatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150"
-                });
-                renderCallsList();
-
-            } catch (err) {
-                console.error("Call error:", err);
-                if (dialtoneAudio) dialtoneAudio.pause();
-                endCall();
-            }
-        }
-
-        async function acceptIncomingCall() {
-            if (!incomingCallData) return;
-
-            // Stop Ringtone & Vibration
-            if (ringtoneAudio) ringtoneAudio.pause();
-            if ('vibrate' in navigator) navigator.vibrate(0);
-
-            document.getElementById('incomingCallModal').classList.remove('show');
-
-            // Smart Permission check
-            localMediaStream = await getMediaStreamWithPermission(incomingCallData.type === 'video');
-            if (!localMediaStream) {
-                declineIncomingCall();
-                return;
-            }
-
-            document.getElementById('callName').innerText = incomingCallData.callerName;
-            document.getElementById('callAvatar').src = incomingCallData.callerAvatar;
-            document.getElementById('callStatusText').innerText = `${incomingCallData.type === 'video' ? 'Video' : 'Voice'} Call Connected`;
-            document.getElementById('callTimer').innerText = "00:00";
-            document.getElementById('callModal').classList.add('show');
-
-            currentCallDocId = incomingCallData.id;
-            const db = firebase.firestore();
-            const callDoc = db.collection("calls").doc(currentCallDocId);
-
-            try {
-                peerConnection = new RTCPeerConnection(rtcServers);
-
-                localMediaStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localMediaStream);
-                });
-
-                peerConnection.ontrack = (event) => {
-                    if (remoteAudioStream) {
-                        remoteAudioStream.srcObject = event.streams[0];
-                        remoteAudioStream.play().catch(() => {});
-                    }
-                };
-
-                const offerCandidates = callDoc.collection("offerCandidates");
-                const answerCandidates = callDoc.collection("answerCandidates");
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        answerCandidates.add(event.candidate.toJSON());
-                    }
-                };
-
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
-
-                const answerDescription = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answerDescription);
-
-                await callDoc.update({
-                    answer: { sdp: answerDescription.sdp, type: answerDescription.type },
-                    status: "connected"
-                });
-
-                offerCandidates.onSnapshot((snapshot) => {
-                    snapshot.docChanges().forEach((change) => {
-                        if (change.type === "added") {
-                            const candidate = new RTCIceCandidate(change.doc.data());
-                            peerConnection.addIceCandidate(candidate).catch(() => {});
-                        }
-                    });
-                });
-
-                requestWakeLock();
-                startCallDurationTimer();
-
-                unsubscribeCurrentCall = callDoc.onSnapshot((snapshot) => {
-                    const data = snapshot.data();
-                    if (data && (data.status === "ended" || data.status === "declined")) {
-                        endCallUI();
-                    }
-                });
-
-            } catch (err) {
-                console.error("Accept fail:", err);
-                endCall();
-            }
-        }
-
-        async function declineIncomingCall() {
-            if (ringtoneAudio) ringtoneAudio.pause();
-            document.getElementById('incomingCallModal').classList.remove('show');
-
-            if (incomingCallData && incomingCallData.id) {
-                firebase.firestore().collection("calls").doc(incomingCallData.id).update({
-                    status: "declined"
-                }).catch(() => {});
-            }
-            incomingCallData = null;
-        }
-
-        function startCallDurationTimer() {
-            clearInterval(activeCallTimerInterval);
-            callSeconds = 0;
-            activeCallTimerInterval = setInterval(() => {
-                callSeconds++;
-                const mins = Math.floor(callSeconds / 60).toString().padStart(2, '0');
-                const secs = (callSeconds % 60).toString().padStart(2, '0');
-                document.getElementById('callTimer').innerText = `${mins}:${secs}`;
-            }, 1000);
-        }
-
-        async function endCall() {
-            if (dialtoneAudio) dialtoneAudio.pause();
-            if (ringtoneAudio) ringtoneAudio.pause();
-
-            if (currentCallDocId) {
-                firebase.firestore().collection("calls").doc(currentCallDocId).update({
-                    status: "ended"
-                }).catch(() => {});
-            }
-
-            endCallUI();
-        }
-
-        function endCallUI() {
-            if (dialtoneAudio) dialtoneAudio.pause();
-            if (ringtoneAudio) ringtoneAudio.pause();
-            if ('vibrate' in navigator) navigator.vibrate(0);
-            
-            releaseWakeLock();
-            clearInterval(activeCallTimerInterval);
-
-            if (localMediaStream) {
-                localMediaStream.getTracks().forEach(track => track.stop());
-                localMediaStream = null;
-            }
-
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-
-            if (unsubscribeCurrentCall) {
-                unsubscribeCurrentCall();
-                unsubscribeCurrentCall = null;
-            }
-
-            document.getElementById('callModal').classList.remove('show');
-            document.getElementById('incomingCallModal').classList.remove('show');
-            currentCallDocId = null;
-        }
-
-        function renderCallsList() {
-            const container = document.getElementById('callsListContainer');
-            if (!container) return;
-            container.innerHTML = '';
-
-            mockCalls.forEach(call => {
-                const row = document.createElement('div');
-                row.className = 'chat-row-item';
-                row.innerHTML = `
-                    <img src="${call.avatar}" class="chat-row-avatar" alt="${call.name}">
-                    <div class="chat-row-details">
-                        <span class="chat-row-name">${call.name}</span>
-                        <div style="font-size: 11.5px; color: ${call.status.includes('Missed') ? '#ef4444' : '#10b981'}; display: flex; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-phone"></i>
-                            <span>${call.status} • ${call.time}</span>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 14px; color: var(--accent-purple); font-size: 16px;">
-                        <i class="fa-solid fa-phone" onclick="alert('Calling ${call.name}...')"></i>
-                        <i class="fa-solid fa-video" onclick="alert('Video calling ${call.name}...')"></i>
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-        }
-
-        function clearCallLogs() {
-            mockCalls = [];
-            renderCallsList();
-        }
-
-        // ================= QR CODE =================
-        function openQrModal() {
-            document.getElementById('qrModalName').innerText = fullNameInput.value || "Ali Raza";
-            document.getElementById('qrModalId').innerText = "@" + (wepziIdDisplay.innerText || "aliraza_786");
-            document.getElementById('qrModal').classList.add('show');
-            toggleSidebar(false);
-        }
-
-        function closeQrModal() {
-            document.getElementById('qrModal').classList.remove('show');
-        }
-
-        function editProfileValue(field) {
-            const newVal = prompt(`Enter your new ${field}:`);
-            if (newVal && newVal.trim()) {
-                if (field === 'Name') {
-                    document.getElementById('drawerMyName').innerText = newVal;
-                    document.getElementById('settingsMyName').innerText = newVal;
-                    document.getElementById('profileTabName').innerText = newVal;
-                    document.getElementById('profileEditName').innerText = newVal;
-                    fullNameInput.value = newVal;
-
-                    const savedSession = localStorage.getItem('wepzi_user_session');
-                    if (savedSession) {
-                        const parsed = JSON.parse(savedSession);
-                        parsed.name = newVal;
-                        localStorage.setItem('wepzi_user_session', JSON.stringify(parsed));
-                        if (window.firebase && firebase.apps.length > 0) {
-                            firebase.firestore().collection("users").doc(parsed.phone).update({ name: newVal });
-                        }
-                    }
-                } else if (field === 'About') {
-                    document.getElementById('profileEditAbout').innerText = newVal;
-                }
-            }
-        }
-
-        // ================= UI CONTROLLERS =================
-        function toggleSidebar(open) {
-            if (open) {
-                sidebarDrawer.classList.add('open');
-                sidebarOverlay.classList.add('show');
-            } else {
-                sidebarDrawer.classList.remove('open');
-                sidebarOverlay.classList.remove('show');
-            }
-        }
-
-        function togglePlusDropdown() {
-            plusDropdown.classList.toggle('show');
-        }
-
-        function toggleSearchBar() {
-            if (searchContainer.style.display === "block") {
-                searchContainer.style.display = "none";
-            } else {
-                searchContainer.style.display = "block";
-                document.getElementById('globalSearchInput').focus();
-            }
-        }
-
-        function toggleAttachments() {
-            attachmentsPanel.classList.toggle('show');
-        }
-
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('.home-header-right')) {
-                plusDropdown.classList.remove('show');
-            }
-            if (!e.target.closest('.chat-input-wrapper') && !e.target.closest('.attachments-panel')) {
-                attachmentsPanel.classList.remove('show');
-            }
+          });
+          isInitialLoad = false; // Pehli dafa loading complete ho gayi
         });
 
-        function switchTab(tab) {
-            toggleSidebar(false);
-            
-            document.getElementById('tabChatsView').style.display = tab === 'chats' ? 'flex' : 'none';
-            document.getElementById('tabCallsView').style.display = tab === 'calls' ? 'block' : 'none';
-            document.getElementById('tabStatusView').style.display = tab === 'status' ? 'block' : 'none';
-            document.getElementById('tabSettingsView').style.display = tab === 'settings' ? 'block' : 'none';
-            document.getElementById('tabProfileView').style.display = tab === 'profile' ? 'block' : 'none';
+    });
 
-            const tabsMapping = { chats: 'btnTabChats', calls: 'btnTabCalls', status: 'btnTabStatus', settings: 'btnTabSettings' };
-            Object.values(tabsMapping).forEach(id => {
-                const element = document.getElementById(id);
-                if (element) element.classList.remove('active');
-            });
+    document.getElementById('userCountBadge').innerText = userCount;
 
-            if (tabsMapping[tab]) {
-                document.getElementById(tabsMapping[tab]).classList.add('active');
-            }
+    if (userCount === 0) {
+      usersListDiv.innerHTML = '<div style="text-align: center; color: #626786; font-size: 14px; margin-top: 40px;">No other users found yet.</div>';
+    }
+
+  } catch (error) {
+    console.log("Error loading chats: ", error);
+  }
+}
+
+function openChat(userName, avatarUrl, chatRowElement) {
+  // Top bar par user ka naam aur picture update karna
+  document.getElementById('activeChatName').innerText = userName;
+  document.getElementById('activeChatAvatar').src = avatarUrl;
+  document.getElementById('activeChatStatus').innerText = "Online";
+  document.getElementById('activeChatAvatarDot').style.display = "block";
+
+  // Unread badge hatana (Mark as read)
+  if (chatRowElement) {
+    const unreadBadge = chatRowElement.querySelector('span[style*="#00c853"]');
+    if (unreadBadge) unreadBadge.style.display = 'none'; // Green badge gayab
+  }
+
+  // Chat Dashboard chupana aur Chat Screen dikhana
+  document.getElementById('chatDashboardScreen').style.display = 'none';
+  document.getElementById('chatConversationScreen').style.display = 'flex';
+
+  // Bilkul screenshot jese same to same messages banana
+  const msgList = document.getElementById('conversationMessagesList');
+  msgList.innerHTML = `
+    <!-- Today Badge -->
+    <div style="align-self: center; background: #121528; color: #8e94b2; font-size: 11.5px; font-weight: 600; padding: 5px 14px; border-radius: 12px; margin-bottom: 16px;">
+      Today
+    </div>
+
+    <div class="chat-bubble-out">
+      Assalam o Alaikum!<br>Design ka kya scene hai?
+      <div class="msg-meta">09:40 PM <span class="tick-seen">✓✓</span></div>
+    </div>
+
+    <div class="chat-bubble-in">
+      Wa Alaikum Salam!<br>Bhai, design ready hai,<br>main abhi bhejta hoon.
+      <div class="msg-meta">09:42 PM</div>
+    </div>
+
+    <div class="file-attachment-card">
+      <div style="background: #a855f7; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+         <svg width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      </div>
+      <div style="flex: 1;">
+        <div style="color: #ffffff; font-size: 14.5px; font-weight: 600; margin-bottom: 3px;">Website_Design.zip</div>
+        <div style="color: #8e94b2; font-size: 12px;">2.4 MB</div>
+      </div>
+      <div style="padding: 10px; background: rgba(255,255,255,0.04); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="20" height="20" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      </div>
+    </div>
+
+    <div class="chat-bubble-out">
+      Shukriya! 👍
+      <div class="msg-meta">09:43 PM <span class="tick-seen">✓✓</span></div>
+    </div>
+  `;
+}
+
+
+// Back Arrow Button Logic (Chat se wapas list me aanay ke liye)
+document.getElementById('btnBackToDashboard').addEventListener('click', () => {
+  document.getElementById('chatConversationScreen').style.display = 'none';
+  document.getElementById('chatDashboardScreen').style.display = 'flex';
+});
+
+
+// ========================================================
+// REAL-TIME FIREBASE CHAT LOGIC (TEXT & VOICE)
+// ========================================================
+const chatInput = document.getElementById('chatMessageInput');
+const btnSendOrMic = document.getElementById('btnSendOrMic');
+const iconMic = document.getElementById('iconMic');
+const iconSend = document.getElementById('iconSend');
+const msgList = document.getElementById('conversationMessagesList');
+
+let isRecording = false;
+let recordStartTime;
+let activeChatUserId = null; // Jis se baat ho rahi hai uska ID
+let unsubscribeChat = null;  // Live connection rokne ke liye
+
+// 1. Chat Open Karne ka Logic (Live Database Reading)
+function openChat(userName, avatarUrl, chatRowElement, targetUserId) {
+  activeChatUserId = targetUserId; // UID save karli global variable mein
+
+  document.getElementById('activeChatName').innerText = userName;
+  document.getElementById('activeChatAvatar').src = avatarUrl;
+  document.getElementById('activeChatStatus').innerText = "Online";
+  document.getElementById('activeChatAvatarDot').style.display = "block";
+
+  // Unread badge hatana (Green dot)
+  if (chatRowElement) {
+    const unreadBadge = chatRowElement.querySelector('span[style*="#00c853"]');
+    if (unreadBadge) unreadBadge.style.display = 'none';
+  }
+
+  document.getElementById('chatDashboardScreen').style.display = 'none';
+  document.getElementById('chatConversationScreen').style.display = 'flex';
+
+  msgList.innerHTML = '<div style="color:#8e94b2; text-align:center; font-size: 13px; margin-top:20px;">Loading chat...</div>';
+
+  // Chat ka ek Unique ID banana (Dono IDs ko mila kar)
+  const chatId = currentUserGlobal.uid < targetUserId 
+      ? currentUserGlobal.uid + '_' + targetUserId 
+      : targetUserId + '_' + currentUserGlobal.uid;
+
+  // Agar pehle kisi aur ki chat khuli thi, usko disconnect karo
+  if (unsubscribeChat) unsubscribeChat();
+
+  // Firebase Firestore Live Listener
+  unsubscribeChat = db.collection('chats').doc(chatId).collection('messages')
+    .orderBy('timestamp', 'asc')
+    .onSnapshot((snapshot) => {
+      msgList.innerHTML = ''; // Purani list saaf karo
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const isMe = data.senderId === currentUserGlobal.uid;
+        // Time format karna
+        const time = data.timestamp ? data.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Sending...";
+
+        let msgHTML = '';
+        
+        // Agar Voice Note hai
+        if (data.type === 'voice') {
+          const sec = data.duration;
+          const formattedSec = sec < 10 ? '0:0' + sec : '0:' + sec;
+          const alignStyle = isMe ? 'align-self: flex-end; background: linear-gradient(135deg, #5b22e6 0%, #7e2bf5 100%);' : 'align-self: flex-start; background: #141728; border: 1px solid rgba(255,255,255,0.08);';
+          const iconColor = isMe ? '#5b22e6' : '#ffffff';
+          const iconBg = isMe ? '#ffffff' : '#6236f5';
+          const textColor = isMe ? '#ffffff' : '#8e94b2';
+
+          msgHTML = `
+            <div class="voice-msg-card" style="${alignStyle}">
+              <div style="width: 44px; height: 44px; background: ${iconBg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="18" height="18" fill="${iconColor}" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </div>
+              <div style="flex: 1; display: flex; align-items: center; gap: 3px; padding: 0 8px;">
+                <div style="height: 12px; width: 3px; background: ${iconBg}; border-radius: 2px;"></div>
+                <div style="height: 18px; width: 3px; background: ${iconBg}; border-radius: 2px;"></div>
+                <div style="height: 10px; width: 3px; background: ${iconBg}; border-radius: 2px;"></div>
+                <div style="height: 24px; width: 3px; background: ${iconBg}; border-radius: 2px;"></div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 38px;">
+                 <span style="color: ${textColor}; font-size: 11px; margin-top: 2px; font-weight: 500;">${formattedSec}</span>
+                 <span style="color: ${textColor}; font-size: 10.5px;">${time} ${isMe ? '<span class="tick-single" style="color: rgba(255,255,255,0.6);">✓</span>' : ''}</span>
+              </div>
+            </div>
+          `;
+        } 
+        // Agar Text Message hai
+        else {
+          const bubbleClass = isMe ? 'chat-bubble-out' : 'chat-bubble-in';
+          msgHTML = `
+            <div class="${bubbleClass}">
+              ${data.text}
+              <div class="msg-meta">${time} ${isMe ? '<span class="tick-single" style="color: rgba(255,255,255,0.6);">✓</span>' : ''}</div>
+            </div>
+          `;
         }
 
-        function filterChats(category, element) {
-            document.querySelectorAll('.filter-bar .chip').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-        }
+        msgList.insertAdjacentHTML('beforeend', msgHTML);
+      });
 
-        function handleGlobalSearch(query) {
-            const normalized = query.toLowerCase().trim();
-            const rows = document.querySelectorAll('#chatListContainer .chat-row-item');
-            rows.forEach(row => {
-                const name = row.querySelector('.chat-row-name').innerText.toLowerCase();
-                const msg = row.querySelector('.chat-row-msg').innerText.toLowerCase();
-                row.style.display = (name.includes(normalized) || msg.includes(normalized)) ? 'flex' : 'none';
-            });
-        }
+      // Page ko automatically neeche scroll karna
+      msgList.scrollTop = msgList.scrollHeight;
+    });
+}
 
-        function logoutUser() {
-            const confirmLogout = confirm("Kya aap waqai Wepzi se Log out karna chahte hain?");
-            if (confirmLogout) {
-                updateUserPresence(false);
-                localStorage.removeItem('wepzi_user_session');
-                localStorage.removeItem('wepzi_logged_in_phone');
-                location.reload();
-            }
-        }
+// 2. Text Message Bhejna (Save to Firebase)
+async function sendTextMessage() {
+  const text = chatInput.value.trim();
+  if (!text || !activeChatUserId) return; // Agar kisi ka chat open nahi tou wapis jao
 
-        // ================= AUTO-LOGIN PERSISTENCE =================
-        window.addEventListener('DOMContentLoaded', async () => {
-            const savedSession = localStorage.getItem('wepzi_user_session');
-            
-            if (savedSession) {
-                try {
-                    const userData = JSON.parse(savedSession);
-                    fullNameInput.value = userData.name || "Ali Raza";
-                    wepziIdDisplay.innerText = userData.wepziId || "aliraza_786";
-                    avatarPreview.src = userData.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300";
-                    if (userData.phone) {
-                        phoneInput.value = userData.phone.replace("+92", "");
-                    }
+  // Fauran text box khali karo aur icon reset karo
+  chatInput.value = '';
+  iconMic.style.display = 'block';
+  iconSend.style.display = 'none';
 
-                    goToScreen(6);
-                    listenForIncomingCalls();
-                    return;
-                } catch (e) {
-                    console.error("Session parse error:", e);
-                }
-            }
+  // Room ID banao
+  const chatId = currentUserGlobal.uid < activeChatUserId 
+      ? currentUserGlobal.uid + '_' + activeChatUserId 
+      : activeChatUserId + '_' + currentUserGlobal.uid;
 
-            goToScreen(1);
-        });
+  // Firebase me bhejo
+  await db.collection('chats').doc(chatId).collection('messages').add({
+    text: text,
+    type: 'text',
+    senderId: currentUserGlobal.uid,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
 
-        // ================= PRESENCE, TYPING & TICK LOGIC =================
-        function updateUserPresence(isOnline) {
-            let rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-            const myPhone = normalizePhoneNumber(rawPhone);
+// 3. Voice Message Bhejna (Save to Firebase)
+async function sendVoiceNoteMessage(sec) {
+  if (!activeChatUserId) return;
 
-            const db = firebase.firestore();
-            db.collection("users").doc(myPhone).set({
-                isOnline: isOnline,
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }).catch(err => console.log("Presence err:", err));
-        }
+  const chatId = currentUserGlobal.uid < activeChatUserId 
+      ? currentUserGlobal.uid + '_' + activeChatUserId 
+      : activeChatUserId + '_' + currentUserGlobal.uid;
 
-        setInterval(() => {
-            if (document.visibilityState === 'visible') {
-                updateUserPresence(true);
-            }
-        }, 25000);
+  await db.collection('chats').doc(chatId).collection('messages').add({
+    duration: sec,
+    type: 'voice',
+    senderId: currentUserGlobal.uid,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
 
-        document.addEventListener('visibilitychange', () => {
-            updateUserPresence(document.visibilityState === 'visible');
-        });
+// ----------------------------------------------------
+// UI Events (Mic toggle, Enter Key, Hold-to-record)
+// ----------------------------------------------------
+chatInput.addEventListener('input', () => {
+  if (chatInput.value.trim().length > 0) {
+    iconMic.style.display = 'none';
+    iconSend.style.display = 'block';
+  } else {
+    iconMic.style.display = 'block';
+    iconSend.style.display = 'none';
+  }
+});
 
-        window.addEventListener('beforeunload', () => {
-            updateUserPresence(false);
-        });
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendTextMessage();
+});
 
-        function handleUserTyping() {
-            if (!currentActiveChatId) return;
-            const myPhone = normalizePhoneNumber(localStorage.getItem('wepzi_logged_in_phone'));
-            const db = firebase.firestore();
+btnSendOrMic.addEventListener('click', () => {
+  if (chatInput.value.trim().length > 0) {
+    sendTextMessage();
+  }
+});
 
-            db.collection("chats").doc(currentActiveChatId).set({
-                typing: { [myPhone]: true }
-            }, { merge: true });
+function startRecording(e) {
+  if (chatInput.value.trim().length > 0) return;
+  e.preventDefault();
+  isRecording = true;
+  recordStartTime = Date.now();
+  btnSendOrMic.style.transform = 'scale(1.25)';
+  btnSendOrMic.style.background = 'linear-gradient(135deg, #ff3b3b 0%, #d81b60 100%)';
+}
 
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                db.collection("chats").doc(currentActiveChatId).set({
-                    typing: { [myPhone]: false }
-                }, { merge: true });
-            }, 2000);
-        }
+function stopRecording(e) {
+  if (!isRecording) return;
+  e.preventDefault();
+  isRecording = false;
+  btnSendOrMic.style.transform = 'scale(1)';
+  btnSendOrMic.style.background = 'linear-gradient(135deg, #7c2bf5 0%, #a435f5 100%)';
+  
+  const durationInSeconds = Math.floor((Date.now() - recordStartTime) / 1000);
+  if (durationInSeconds >= 1) {
+    sendVoiceNoteMessage(durationInSeconds);
+  }
+}
 
-        function formatLastSeen(timestamp) {
-            if (!timestamp) return "offline";
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-            const now = new Date();
-            
-            const isToday = date.toDateString() === now.toDateString();
-            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+// Mouse aur Touch dono k liye Hold commands
+btnSendOrMic.addEventListener('mousedown', startRecording);
+btnSendOrMic.addEventListener('touchstart', startRecording, { passive: false });
+btnSendOrMic.addEventListener('mouseup', stopRecording);
+btnSendOrMic.addEventListener('touchend', stopRecording, { passive: false });
+btnSendOrMic.addEventListener('mouseleave', stopRecording);
 
-            if (isToday) {
-                return `Last seen today at ${timeStr}`;
-            }
+// Chat band kar k wapis dashboard jane ka button
+document.getElementById('btnBackToDashboard').addEventListener('click', () => {
+  if (unsubscribeChat) unsubscribeChat(); // Data flow band karo background me
+  document.getElementById('chatConversationScreen').style.display = 'none';
+  document.getElementById('chatDashboardScreen').style.display = 'flex';
+});
 
-            const yesterday = new Date(now);
-            yesterday.setDate(now.getDate() - 1);
-            if (date.toDateString() === yesterday.toDateString()) {
-                return `Last seen yesterday at ${timeStr}`;
-            }
+  </script>
 
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            return `Last seen ${day}/${month} at ${timeStr}`;
-        }
-
-        function getTickHtml(msg, isMe) {
-            if (!isMe) return '';
-
-            if (msg.status === 'read') {
-                return `<span title="Seen" class="tick-icon tick-read"><i class="fa-solid fa-check-double"></i></span>`;
-            } else if (msg.status === 'delivered') {
-                return `<span title="Delivered" class="tick-icon tick-delivered"><i class="fa-solid fa-check-double"></i></span>`;
-            } else {
-                return `<span title="Sent" class="tick-icon tick-sent"><i class="fa-solid fa-check"></i></span>`;
-            }
-        }
-
-        function markMessagesAsRead(chatId, partnerPhone) {
-            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-            const myPhone = normalizePhoneNumber(rawPhone);
-
-            const db = firebase.firestore();
-            db.collection("chats").doc(chatId).collection("messages")
-                .where("sender", "==", partnerPhone)
-                .get()
-                .then((snapshot) => {
-                    if (snapshot.empty) return;
-                    const batch = db.batch();
-                    let updatedCount = 0;
-
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        if (data.status !== "read") {
-                            batch.update(doc.ref, { 
-                                status: "read",
-                                seenAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                            updatedCount++;
-                        }
-                    });
-
-                    if (updatedCount > 0) {
-                        batch.commit();
-                    }
-                })
-                .catch(err => console.error("Error marking read:", err));
-        }
-
-        function markIncomingMessagesAsDelivered() {
-            const rawPhone = localStorage.getItem('wepzi_logged_in_phone');
-            if (!rawPhone || !window.firebase || firebase.apps.length === 0) return;
-            const myPhone = normalizePhoneNumber(rawPhone);
-
-            const db = firebase.firestore();
-            db.collectionGroup("messages")
-                .where("receiver", "==", myPhone)
-                .get()
-                .then((snapshot) => {
-                    if (snapshot.empty) return;
-                    const batch = db.batch();
-                    let count = 0;
-                    snapshot.forEach((doc) => {
-                        if (doc.data().status === "sent") {
-                            batch.update(doc.ref, { status: "delivered" });
-                            count++;
-                        }
-                    });
-                    if (count > 0) batch.commit();
-                })
-                .catch(err => console.log("Delivered sync note:", err.message));
-        }
-
-        // ================= SMART PERMISSION REQUEST & FALLBACK =================
-        async function getMediaStreamWithPermission(isVideo = false) {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert("⚠️ Aapka browser media access support nahi karta ya page HTTPS par nahi hai!");
-                return null;
-            }
-
-            // 1. Try with clear constraints
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    },
-                    video: isVideo
-                });
-                return stream;
-            } catch (err) {
-                console.warn("Advanced audio constraints failed, trying basic audio...", err);
-                
-                // 2. Fallback to basic audio
-                try {
-                    const fallbackStream = await navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: isVideo
-                    });
-                    return fallbackStream;
-                } catch (error) {
-                    console.error("Microphone Error:", error);
-                    
-                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                        alert("⚠️ Microphone Permission Blocked!\n\nHal: Browser URL bar mein bane Lock (🔒) icon par tap karein aur Microphone ko 'Allow' karein.");
-                    } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError' || (error.message && error.message.includes('start audio source'))) {
-                        alert("⚠️ Microphone Busy Hai!\n\nHal: Koi doosri app (WhatsApp, Call Recorder, Screen Recorder) mic use kar rahi hai. Saari apps band karein aur phone restart karein.");
-                    } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                        alert("⚠️ Mobile ka Microphone nahi mila!");
-                    } else {
-                        alert("⚠️ Audio Access Error: " + error.message);
-                    }
-                    return null;
-                }
-            }
-        }
-
-        let wakeLock = null;
-
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    console.log('Screen WakeLock active');
-                }
-            } catch (err) {
-                console.log('WakeLock error:', err);
-            }
-        }
-
-        function releaseWakeLock() {
-            if (wakeLock !== null) {
-                wakeLock.release();
-                wakeLock = null;
-            }
-        }
-
-        // ================= SETTINGS LOGIC =================
-        let appSettings = JSON.parse(localStorage.getItem('wepzi_settings')) || {
-            ringtone: true,
-            vibrate: true
-        };
-
-        async function testMicrophone() {
-            const statusText = document.getElementById('micStatusText');
-            statusText.innerText = "Testing mic...";
-            statusText.style.color = "var(--text-muted)";
-            
-            const stream = await getMediaStreamWithPermission(false);
-            if (stream) {
-                statusText.innerText = "✅ Microphone Working & Allowed";
-                statusText.style.color = "#10b981";
-                // Properly release hardware stream immediately
-                stream.getTracks().forEach(t => t.stop());
-                alert("✅ Microphone bilkul theek kaam kar raha hai!");
-            } else {
-                statusText.innerText = "❌ Permission Denied / Error";
-                statusText.style.color = "#ef4444";
-            }
-        }
-
-        function toggleSetting(key) {
-            appSettings[key] = !appSettings[key];
-            localStorage.setItem('wepzi_settings', JSON.stringify(appSettings));
-            updateSettingsUI();
-        }
-
-        function updateSettingsUI() {
-            const rIcon = document.getElementById('ringtoneToggleIcon');
-            const rText = document.getElementById('ringtoneStatusText');
-            if (rIcon && rText) {
-                rIcon.className = appSettings.ringtone ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
-                rIcon.style.color = appSettings.ringtone ? "#10b981" : "var(--text-muted)";
-                rText.innerText = appSettings.ringtone ? "Enabled" : "Disabled";
-            }
-
-            const vIcon = document.getElementById('vibrateToggleIcon');
-            const vText = document.getElementById('vibrateStatusText');
-            if (vIcon && vText) {
-                vIcon.className = appSettings.vibrate ? "fa-solid fa-toggle-on" : "fa-solid fa-toggle-off";
-                vIcon.style.color = appSettings.vibrate ? "#10b981" : "var(--text-muted)";
-                vText.innerText = appSettings.vibrate ? "Enabled" : "Disabled";
-            }
-        }
-    </script>
 </body>
 </html>
